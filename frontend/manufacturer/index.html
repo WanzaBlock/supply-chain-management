@@ -82,7 +82,7 @@
               </tr>
             </thead>
             <tbody id="recentBody">
-              <tr><td colspan="5" style="text-align:center;color:#6B7280;padding:20px">Loading...</td></tr>
+              <tr><td colspan="6" style="text-align:center;color:#6B7280;padding:20px">Loading...</td></tr>
             </tbody>
           </table>
         </div>
@@ -244,7 +244,7 @@ async function loadOverview() {
     let activeCount = 0;
     const tbody = document.getElementById('recentBody');
     if (!list || list.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#6B7280;padding:20px">No products registered yet.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#6B7280;padding:20px">No products registered yet.</td></tr>`;
       return;
     }
 
@@ -256,6 +256,7 @@ async function loadOverview() {
         <td>${p.batch_number || '—'}</td>
         <td>${p.created_at ? new Date(p.created_at).toLocaleDateString() : '—'}</td>
         <td><span class="badge ${p.is_active === false ? 'badge-red' : 'badge-green'}">${p.is_active === false ? 'Inactive' : 'Active'}</span></td>
+        <td><button class="btn btn-secondary btn-sm" onclick="showQR('${p.product_code}','${p.name}')">QR</button></td>
       </tr>`;
     }).join('');
 
