@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Manufacturer Dashboard — Supply Chain</title>
   <link rel="stylesheet" href="../shared/style.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js">function showQR(code, name) {
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>function showQR(code, name) {
   const url = `https://wanzablocksupply.vercel.app/consumer/?code=${encodeURIComponent(code)}`;
   document.getElementById("qrTitle").textContent = name;
   document.getElementById("qrUrl").textContent = url;
