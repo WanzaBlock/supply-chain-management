@@ -1,0 +1,16 @@
+[
+  {"type":"constructor","inputs":[{"name":"accessContract","type":"address","internalType":"address"}],"stateMutability":"nonpayable"},
+  {"type":"function","name":"access","inputs":[],"outputs":[{"name":"","type":"address","internalType":"contract SupplyChainAccess"}],"stateMutability":"view"},
+  {"type":"function","name":"registerProduct","inputs":[{"name":"productId","type":"bytes32"},{"name":"metadataHash","type":"string"}],"outputs":[],"stateMutability":"nonpayable"},
+  {"type":"function","name":"recordTransfer","inputs":[{"name":"productId","type":"bytes32"},{"name":"to","type":"address"},{"name":"locationHash","type":"string"},{"name":"conditionHash","type":"string"},{"name":"notes","type":"string"}],"outputs":[],"stateMutability":"nonpayable"},
+  {"type":"function","name":"deactivateProduct","inputs":[{"name":"productId","type":"bytes32"}],"outputs":[],"stateMutability":"nonpayable"},
+  {"type":"function","name":"getProduct","inputs":[{"name":"productId","type":"bytes32"}],"outputs":[{"name":"","type":"tuple","components":[{"name":"id","type":"bytes32"},{"name":"manufacturer","type":"address"},{"name":"metadataHash","type":"string"},{"name":"isActive","type":"bool"},{"name":"registeredAt","type":"uint256"}]}],"stateMutability":"view"},
+  {"type":"function","name":"getHistory","inputs":[{"name":"productId","type":"bytes32"}],"outputs":[{"name":"","type":"tuple[]","components":[{"name":"from","type":"address"},{"name":"to","type":"address"},{"name":"timestamp","type":"uint256"},{"name":"locationHash","type":"string"},{"name":"conditionHash","type":"string"},{"name":"notes","type":"string"}]}],"stateMutability":"view"},
+  {"type":"function","name":"productExists","inputs":[{"name":"productId","type":"bytes32"}],"outputs":[{"name":"","type":"bool"}],"stateMutability":"view"},
+  {"type":"function","name":"getTransferCount","inputs":[{"name":"productId","type":"bytes32"}],"outputs":[{"name":"","type":"uint256"}],"stateMutability":"view"},
+  {"type":"function","name":"getTotalProducts","inputs":[],"outputs":[{"name":"","type":"uint256"}],"stateMutability":"view"},
+  {"type":"function","name":"getProductIds","inputs":[{"name":"offset","type":"uint256"},{"name":"limit","type":"uint256"}],"outputs":[{"name":"ids","type":"bytes32[]"},{"name":"total","type":"uint256"}],"stateMutability":"view"},
+  {"type":"event","name":"ProductRegistered","inputs":[{"name":"productId","type":"bytes32","indexed":true},{"name":"manufacturer","type":"address","indexed":true},{"name":"metadataHash","type":"string","indexed":false}],"anonymous":false},
+  {"type":"event","name":"TransferRecorded","inputs":[{"name":"productId","type":"bytes32","indexed":true},{"name":"from","type":"address","indexed":true},{"name":"to","type":"address","indexed":true}],"anonymous":false},
+  {"type":"event","name":"ProductDeactivated","inputs":[{"name":"productId","type":"bytes32","indexed":true}],"anonymous":false}
+]

@@ -1,0 +1,278 @@
+/* shared/style.css — Base styles shared across all dashboards */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --blue:        #1F4E79;
+  --mid-blue:    #2E75B6;
+  --light-blue:  #D5E8F0;
+  --accent-blue: #BDD7EE;
+  --dark-gray:   #404040;
+  --gray:        #6B7280;
+  --light-gray:  #F3F4F6;
+  --white:       #FFFFFF;
+  --green:       #16a34a;
+  --red:         #dc2626;
+  --yellow:      #d97706;
+  --font:        'Inter', system-ui, sans-serif;
+  --radius:      8px;
+  --shadow:      0 1px 3px rgba(0,0,0,.1);
+}
+
+body {
+  font-family: var(--font);
+  color:       var(--dark-gray);
+  background:  var(--light-gray);
+  min-height:  100vh;
+  font-size:   15px;
+  line-height: 1.5;
+}
+
+/* ── Layout ──────────────────────────────────────────────────────────────── */
+
+.app-header {
+  background:  var(--blue);
+  color:       var(--white);
+  padding:     0 24px;
+  height:      56px;
+  display:     flex;
+  align-items: center;
+  gap:         16px;
+}
+.app-header h1 { font-size: 16px; font-weight: 600; flex: 1; }
+.app-header .role-badge {
+  font-size:    12px;
+  padding:      3px 10px;
+  border-radius: 20px;
+  background:   var(--accent-blue);
+  color:        var(--blue);
+  font-weight:  600;
+}
+.wallet-display {
+  font-size:  13px;
+  color:      var(--accent-blue);
+  font-family: monospace;
+}
+
+.layout {
+  display:             grid;
+  grid-template-columns: 220px 1fr;
+  min-height:          calc(100vh - 56px);
+}
+
+.sidebar {
+  background: var(--blue);
+  padding:    16px 0;
+}
+.sidebar nav a {
+  display:     block;
+  color:       var(--accent-blue);
+  text-decoration: none;
+  padding:     10px 20px;
+  font-size:   14px;
+  transition:  background .15s;
+}
+.sidebar nav a:hover,
+.sidebar nav a.active {
+  background: rgba(255,255,255,.1);
+  color:      var(--white);
+}
+.sidebar nav a.active { font-weight: 600; border-left: 3px solid var(--accent-blue); }
+
+.main { padding: 24px; overflow-y: auto; }
+
+/* ── Cards ───────────────────────────────────────────────────────────────── */
+
+.card {
+  background:    var(--white);
+  border-radius: var(--radius);
+  box-shadow:    var(--shadow);
+  padding:       20px 24px;
+  margin-bottom: 20px;
+}
+.card-title {
+  font-size:   15px;
+  font-weight: 600;
+  color:       var(--blue);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--light-blue);
+}
+
+.stat-grid {
+  display:               grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap:                   16px;
+  margin-bottom:         20px;
+}
+.stat-card {
+  background:    var(--light-blue);
+  border-radius: var(--radius);
+  padding:       16px;
+  text-align:    center;
+}
+.stat-card .stat-number {
+  font-size:   28px;
+  font-weight: 700;
+  color:       var(--blue);
+}
+.stat-card .stat-label {
+  font-size: 12px;
+  color:     var(--gray);
+  margin-top: 4px;
+}
+
+/* ── Forms ───────────────────────────────────────────────────────────────── */
+
+.form-grid {
+  display:               grid;
+  grid-template-columns: 1fr 1fr;
+  gap:                   14px;
+}
+.form-grid.single { grid-template-columns: 1fr; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group label { font-size: 13px; font-weight: 500; color: var(--gray); }
+.form-group input,
+.form-group textarea,
+.form-group select {
+  padding:       8px 12px;
+  border:        1px solid #D1D5DB;
+  border-radius: var(--radius);
+  font-size:     14px;
+  font-family:   var(--font);
+  transition:    border-color .15s;
+  color:         var(--dark-gray);
+}
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline:      none;
+  border-color: var(--mid-blue);
+  box-shadow:   0 0 0 3px rgba(46,117,182,.15);
+}
+.form-group textarea { resize: vertical; min-height: 80px; }
+
+.form-actions { margin-top: 18px; display: flex; gap: 10px; align-items: center; }
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+
+.btn {
+  padding:       9px 20px;
+  border:        none;
+  border-radius: var(--radius);
+  font-size:     14px;
+  font-weight:   500;
+  cursor:        pointer;
+  transition:    background .15s, transform .1s;
+  font-family:   var(--font);
+}
+.btn:active { transform: scale(.98); }
+.btn-primary   { background: var(--mid-blue); color: var(--white); }
+.btn-primary:hover   { background: var(--blue); }
+.btn-secondary { background: var(--light-gray); color: var(--dark-gray); border: 1px solid #D1D5DB; }
+.btn-secondary:hover { background: #E5E7EB; }
+.btn-danger    { background: var(--red); color: var(--white); }
+.btn-danger:hover    { background: #b91c1c; }
+.btn-sm { padding: 5px 12px; font-size: 13px; }
+.btn:disabled  { opacity: .5; cursor: not-allowed; }
+
+/* ── Tables ──────────────────────────────────────────────────────────────── */
+
+.table-wrap { overflow-x: auto; }
+table {
+  width:           100%;
+  border-collapse: collapse;
+  font-size:       14px;
+}
+thead tr { background: var(--blue); color: var(--white); }
+thead th { padding: 10px 14px; text-align: left; font-weight: 500; white-space: nowrap; }
+tbody tr:nth-child(even)  { background: var(--light-gray); }
+tbody tr:hover             { background: var(--light-blue); }
+tbody td { padding: 9px 14px; border-bottom: 1px solid #E5E7EB; vertical-align: middle; }
+tbody td.mono { font-family: monospace; font-size: 12px; }
+
+/* ── Badges ──────────────────────────────────────────────────────────────── */
+
+.badge {
+  display:       inline-block;
+  padding:       2px 9px;
+  border-radius: 20px;
+  font-size:     12px;
+  font-weight:   500;
+}
+.badge-green  { background: #D1FAE5; color: #065F46; }
+.badge-red    { background: #FEE2E2; color: #991B1B; }
+.badge-yellow { background: #FEF3C7; color: #92400E; }
+.badge-blue   { background: var(--light-blue); color: var(--blue); }
+
+/* ── Status message ──────────────────────────────────────────────────────── */
+
+.status {
+  font-size:   14px;
+  padding:     8px 14px;
+  border-radius: var(--radius);
+  margin-top:  10px;
+  display:     none;
+}
+.status.info    { display: block; background: var(--light-blue); color: var(--blue); }
+.status.success { display: block; background: #D1FAE5; color: #065F46; }
+.status.error   { display: block; background: #FEE2E2; color: #991B1B; }
+.status.loading { display: block; background: #FEF3C7; color: #92400E; }
+
+/* ── Timeline ────────────────────────────────────────────────────────────── */
+
+.timeline { list-style: none; padding: 0; position: relative; }
+.timeline::before {
+  content:    '';
+  position:   absolute;
+  left:       14px;
+  top:        0;
+  bottom:     0;
+  width:      2px;
+  background: var(--accent-blue);
+}
+.timeline li {
+  position:    relative;
+  padding:     0 0 20px 40px;
+}
+.timeline li::before {
+  content:     '';
+  position:    absolute;
+  left:        7px;
+  top:         4px;
+  width:       14px;
+  height:      14px;
+  border-radius: 50%;
+  background:  var(--mid-blue);
+  border:      2px solid var(--white);
+  box-shadow:  0 0 0 2px var(--mid-blue);
+}
+.timeline .tl-time   { font-size: 12px; color: var(--gray); margin-bottom: 2px; }
+.timeline .tl-title  { font-weight: 600; font-size: 14px; color: var(--blue); }
+.timeline .tl-detail { font-size: 13px; color: var(--gray); margin-top: 2px; }
+.timeline .tl-hash   { font-size: 11px; color: var(--gray); font-family: monospace; margin-top: 4px; }
+
+/* ── Connect screen ──────────────────────────────────────────────────────── */
+
+.connect-screen {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  min-height:      calc(100vh - 56px);
+  gap:             16px;
+  text-align:      center;
+}
+.connect-screen h2 { font-size: 20px; color: var(--blue); }
+.connect-screen p  { color: var(--gray); font-size: 14px; max-width: 320px; }
+
+/* ── QR Reader ───────────────────────────────────────────────────────────── */
+
+#reader { width: 300px; margin: 0 auto; }
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .form-grid { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Foundry build artifacts
+out/
+cache/
+
+# Environment files
+.env
+.env.*
+
+# Foundry keystore
+keystore/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# live-server
+.cache/

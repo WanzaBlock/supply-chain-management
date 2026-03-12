@@ -1,0 +1,17 @@
+[
+  {"type":"constructor","inputs":[],"stateMutability":"nonpayable"},
+  {"type":"function","name":"owner","inputs":[],"outputs":[{"name":"","type":"address"}],"stateMutability":"view"},
+  {"type":"function","name":"MANUFACTURER","inputs":[],"outputs":[{"name":"","type":"bytes32"}],"stateMutability":"view"},
+  {"type":"function","name":"DISTRIBUTOR","inputs":[],"outputs":[{"name":"","type":"bytes32"}],"stateMutability":"view"},
+  {"type":"function","name":"REGULATOR","inputs":[],"outputs":[{"name":"","type":"bytes32"}],"stateMutability":"view"},
+  {"type":"function","name":"CONSUMER","inputs":[],"outputs":[{"name":"","type":"bytes32"}],"stateMutability":"view"},
+  {"type":"function","name":"NONE","inputs":[],"outputs":[{"name":"","type":"bytes32"}],"stateMutability":"view"},
+  {"type":"function","name":"assignRole","inputs":[{"name":"account","type":"address"},{"name":"role","type":"bytes32"}],"outputs":[],"stateMutability":"nonpayable"},
+  {"type":"function","name":"revokeRole","inputs":[{"name":"account","type":"address"}],"outputs":[],"stateMutability":"nonpayable"},
+  {"type":"function","name":"hasRole","inputs":[{"name":"account","type":"address"},{"name":"role","type":"bytes32"}],"outputs":[{"name":"","type":"bool"}],"stateMutability":"view"},
+  {"type":"function","name":"getRole","inputs":[{"name":"account","type":"address"}],"outputs":[{"name":"","type":"bytes32"}],"stateMutability":"view"},
+  {"type":"function","name":"transferOwnership","inputs":[{"name":"newOwner","type":"address"}],"outputs":[],"stateMutability":"nonpayable"},
+  {"type":"event","name":"RoleAssigned","inputs":[{"name":"account","type":"address","indexed":true},{"name":"role","type":"bytes32","indexed":true}],"anonymous":false},
+  {"type":"event","name":"RoleRevoked","inputs":[{"name":"account","type":"address","indexed":true},{"name":"role","type":"bytes32","indexed":true}],"anonymous":false},
+  {"type":"event","name":"OwnershipTransferred","inputs":[{"name":"previousOwner","type":"address","indexed":true},{"name":"newOwner","type":"address","indexed":true}],"anonymous":false}
+]

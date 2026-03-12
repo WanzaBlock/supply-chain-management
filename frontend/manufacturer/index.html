@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manufacturer Dashboard — Supply Chain</title>
+  <link rel="stylesheet" href="../shared/style.css">
+  <style>
+    .section { display: none; }
+    .section.active { display: block; }
+  </style>
+</head>
+<body>
+
+<header class="app-header">
+  <h1>Supply Chain — Manufacturer</h1>
+  <span class="role-badge">MANUFACTURER</span>
+  <span class="wallet-display" id="walletDisplay">Not connected</span>
+  <button class="btn btn-secondary btn-sm" id="connectBtn">Connect Wallet</button>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <nav>
+      <a href="#" class="active" data-section="overview">Overview</a>
+      <a href="#" data-section="register">Register Product</a>
+      <a href="#" data-section="transfer">Record Transfer</a>
+      <a href="#" data-section="products">My Products</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+
+    <!-- ── Connect prompt ──────────────────────────────────────────────── -->
+    <div id="connectPrompt" class="connect-screen">
+      <h2>Connect your wallet</h2>
+      <p>Connect your MetaMask wallet to access the manufacturer dashboard.</p>
+      <button class="btn btn-primary" id="connectBtnMain">Connect MetaMask</button>
+    </div>
+
+    <!-- ── Overview ────────────────────────────────────────────────────── -->
+    <div class="section" id="overview">
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="statTotal">—</div>
+          <div class="stat-label">Products Registered</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="statTransfers">—</div>
+          <div class="stat-label">Total Transfers</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="statActive">—</div>
+          <div class="stat-label">Active Products</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Recent Products</div>
+        <div class="table-wrap">
+          <table id="recentTable">
+            <thead>
+              <tr>
+                <th>Product Code</th>
+                <th>Name</th>
+                <th>Batch</th>
+                <th>Registered</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="recentBody">
+              <tr><td colspan="5" style="text-align:center;color:#6B7280;padding:20px">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Register Product ─────────────────────────────────────────────── -->
+    <div class="section" id="register">
+      <div class="card">
+        <div class="card-title">Register New Product Batch</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Product Code *</label>
+            <input type="text" id="productCode" placeholder="e.g. SEED-BATCH-001">
+          </div>
+          <div class="form-group">
+            <label>Product Name *</label>
+            <input type="text" id="productName" placeholder="e.g. Maize Seed — Hybrid Variety">
+          </div>
+          <div class="form-group">
+            <label>Origin</label>
+            <input type="text" id="productOrigin" placeholder="e.g. Lusaka, Zambia">
+          </div>
+          <div class="form-group">
+            <label>Batch Number</label>
+            <input type="text" id="batchNumber" placeholder="e.g. ZM-2025-001">
+          </div>
+          <div class="form-group">
+            <label>Expiry Date</label>
+            <input type="date" id="expiryDate">
+          </div>
+          <div class="form-group">
+            <label>Metadata Hash (IPFS CID or storage key) *</label>
+            <input type="text" id="metadataHash" placeholder="ipfs://Qm... or supabase-ref">
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1">
+            <label>Description</label>
+            <textarea id="description" placeholder="Brief description of the product batch..."></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" id="registerBtn">Register on Chain</button>
+          <span class="status" id="registerStatus"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Record Transfer ──────────────────────────────────────────────── -->
+    <div class="section" id="transfer">
+      <div class="card">
+        <div class="card-title">Record Custody Transfer</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Product Code *</label>
+            <input type="text" id="txProductCode" placeholder="e.g. SEED-BATCH-001">
+          </div>
+          <div class="form-group">
+            <label>Recipient Address *</label>
+            <input type="text" id="txToAddress" placeholder="0x...">
+          </div>
+          <div class="form-group">
+            <label>Location</label>
+            <input type="text" id="txLocation" placeholder="e.g. Lusaka Depot, 28.3N, -15.4E">
+          </div>
+          <div class="form-group">
+            <label>Condition</label>
+            <input type="text" id="txCondition" placeholder="e.g. 4°C, humidity 60%">
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1">
+            <label>Notes</label>
+            <textarea id="txNotes" placeholder="Any notes about this transfer..."></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" id="transferBtn">Record Transfer</button>
+          <span class="status" id="transferStatus"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Products List ────────────────────────────────────────────────── -->
+    <div class="section" id="products">
+      <div class="card">
+        <div class="card-title">My Registered Products</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Product Code</th>
+                <th>Name</th>
+                <th>Origin</th>
+                <th>Batch</th>
+                <th>Expiry</th>
+                <th>Status</th>
+                <th>Tx</th>
+              </tr>
+            </thead>
+            <tbody id="productsBody">
+              <tr><td colspan="7" style="text-align:center;color:#6B7280;padding:20px">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script type="module">
+import { connectWallet, getWallet, shortenAddress, products, formatTimestamp, setStatus } from '../shared/api.js';
+
+let wallet = null;
+
+// ── Wallet ────────────────────────────────────────────────────────────────────
+async function connect() {
+  try {
+    wallet = await connectWallet();
+    document.getElementById('walletDisplay').textContent = shortenAddress(wallet);
+    document.getElementById('connectPrompt').style.display = 'none';
+    showSection('overview');
+    loadOverview();
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
+document.getElementById('connectBtn').addEventListener('click', connect);
+document.getElementById('connectBtnMain').addEventListener('click', connect);
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+document.querySelectorAll('.sidebar nav a').forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    if (!wallet) { alert('Connect your wallet first.'); return; }
+    document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'));
+    link.classList.add('active');
+    showSection(link.dataset.section);
+    if (link.dataset.section === 'overview') loadOverview();
+    if (link.dataset.section === 'products') loadProducts();
+  });
+});
+
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(name);
+  if (el) el.classList.add('active');
+}
+
+// ── Overview ──────────────────────────────────────────────────────────────────
+async function loadOverview() {
+  try {
+    const { products: list, total } = await products.list({ manufacturer: wallet, limit: 5 });
+    document.getElementById('statTotal').textContent = total ?? '—';
+
+    let activeCount = 0;
+    const tbody = document.getElementById('recentBody');
+    if (!list || list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#6B7280;padding:20px">No products registered yet.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = list.map(p => {
+      if (p.is_active !== false) activeCount++;
+      return `<tr>
+        <td class="mono">${p.product_code || '—'}</td>
+        <td>${p.name || '—'}</td>
+        <td>${p.batch_number || '—'}</td>
+        <td>${p.created_at ? new Date(p.created_at).toLocaleDateString() : '—'}</td>
+        <td><span class="badge ${p.is_active === false ? 'badge-red' : 'badge-green'}">${p.is_active === false ? 'Inactive' : 'Active'}</span></td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('statActive').textContent = activeCount;
+    document.getElementById('statTransfers').textContent = '—'; // Requires separate call
+  } catch (err) {
+    console.error('Overview error:', err);
+  }
+}
+
+// ── Register ──────────────────────────────────────────────────────────────────
+document.getElementById('registerBtn').addEventListener('click', async () => {
+  if (!wallet) { alert('Connect your wallet first.'); return; }
+  const status = document.getElementById('registerStatus');
+  const body = {
+    productCode:  document.getElementById('productCode').value.trim(),
+    name:         document.getElementById('productName').value.trim(),
+    origin:       document.getElementById('productOrigin').value.trim(),
+    batchNumber:  document.getElementById('batchNumber').value.trim(),
+    expiryDate:   document.getElementById('expiryDate').value,
+    metadataHash: document.getElementById('metadataHash').value.trim(),
+    description:  document.getElementById('description').value.trim(),
+  };
+
+  if (!body.productCode || !body.metadataHash) {
+    return setStatus(status, 'Product Code and Metadata Hash are required.', 'error');
+  }
+
+  setStatus(status, 'Sending transaction...', 'loading');
+  document.getElementById('registerBtn').disabled = true;
+
+  try {
+    const res = await products.register(body, wallet);
+    setStatus(status, `Registered. Tx: ${res.txHash}`, 'success');
+  } catch (err) {
+    setStatus(status, err.message, 'error');
+  } finally {
+    document.getElementById('registerBtn').disabled = false;
+  }
+});
+
+// ── Transfer ──────────────────────────────────────────────────────────────────
+document.getElementById('transferBtn').addEventListener('click', async () => {
+  if (!wallet) { alert('Connect your wallet first.'); return; }
+  const status = document.getElementById('transferStatus');
+  const code    = document.getElementById('txProductCode').value.trim();
+  const toAddr  = document.getElementById('txToAddress').value.trim();
+
+  if (!code || !toAddr) return setStatus(status, 'Product code and recipient address are required.', 'error');
+
+  setStatus(status, 'Sending transaction...', 'loading');
+  document.getElementById('transferBtn').disabled = true;
+
+  try {
+    const res = await products.transfer(code, {
+      toAddress:  toAddr,
+      location:   { raw: document.getElementById('txLocation').value.trim() },
+      condition:  { raw: document.getElementById('txCondition').value.trim() },
+      notes:      document.getElementById('txNotes').value.trim(),
+    }, wallet);
+    setStatus(status, `Transfer recorded. Tx: ${res.txHash}`, 'success');
+  } catch (err) {
+    setStatus(status, err.message, 'error');
+  } finally {
+    document.getElementById('transferBtn').disabled = false;
+  }
+});
+
+// ── Products list ─────────────────────────────────────────────────────────────
+async function loadProducts() {
+  const tbody = document.getElementById('productsBody');
+  tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#6B7280;padding:20px">Loading...</td></tr>`;
+  try {
+    const { products: list } = await products.list({ manufacturer: wallet, limit: 50 });
+    if (!list || list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#6B7280;padding:20px">No products found.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = list.map(p => `<tr>
+      <td class="mono">${p.product_code || '—'}</td>
+      <td>${p.name || '—'}</td>
+      <td>${p.origin || '—'}</td>
+      <td>${p.batch_number || '—'}</td>
+      <td>${p.expiry_date || '—'}</td>
+      <td><span class="badge ${p.is_active === false ? 'badge-red' : 'badge-green'}">${p.is_active === false ? 'Inactive' : 'Active'}</span></td>
+      <td class="mono"><a href="https://sepolia.basescan.org/tx/${p.tx_hash}" target="_blank" style="color:var(--mid-blue);font-size:11px">${p.tx_hash ? p.tx_hash.slice(0, 10) + '...' : '—'}</a></td>
+    </tr>`).join('');
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="7" style="color:red;padding:20px">${err.message}</td></tr>`;
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(async () => {
+  wallet = await getWallet();
+  if (wallet) {
+    document.getElementById('walletDisplay').textContent = shortenAddress(wallet);
+    document.getElementById('connectPrompt').style.display = 'none';
+    showSection('overview');
+    loadOverview();
+  }
+
+  if (window.ethereum) {
+    window.ethereum.on('accountsChanged', accs => {
+      wallet = accs[0] || null;
+      location.reload();
+    });
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Regulator Dashboard — Supply Chain</title>
+  <link rel="stylesheet" href="../shared/style.css">
+  <style>
+    .section { display: none; }
+    .section.active { display: block; }
+    .filter-bar { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 16px; }
+    .filter-bar .form-group { margin-bottom: 0; }
+    .export-btn { margin-left: auto; }
+  </style>
+</head>
+<body>
+
+<header class="app-header">
+  <h1>Supply Chain — Regulator</h1>
+  <span class="role-badge">REGULATOR</span>
+  <span class="wallet-display" id="walletDisplay">Not connected</span>
+  <button class="btn btn-secondary btn-sm" id="connectBtn">Connect Wallet</button>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <nav>
+      <a href="#" class="active" data-section="overview">Overview</a>
+      <a href="#" data-section="events">All Events</a>
+      <a href="#" data-section="flags">Flags</a>
+      <a href="#" data-section="deactivate">Deactivate Product</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+
+    <!-- ── Connect prompt ──────────────────────────────────────────────── -->
+    <div id="connectPrompt" class="connect-screen">
+      <h2>Connect your wallet</h2>
+      <p>Connect your MetaMask wallet to access the regulator dashboard.</p>
+      <button class="btn btn-primary" id="connectBtnMain">Connect MetaMask</button>
+    </div>
+
+    <!-- ── Overview ────────────────────────────────────────────────────── -->
+    <div class="section" id="overview">
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="statProducts">—</div>
+          <div class="stat-label">Total Products</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="statTransfers">—</div>
+          <div class="stat-label">Total Transfers</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="statFlags" style="color:var(--red)">—</div>
+          <div class="stat-label">Open Flags</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Recent Transfer Events</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Product</th><th>From</th><th>To</th><th>Notes</th><th>Date</th><th>Tx</th></tr>
+            </thead>
+            <tbody id="overviewEventsBody">
+              <tr><td colspan="6" style="text-align:center;color:#6B7280;padding:20px">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── All Events ───────────────────────────────────────────────────── -->
+    <div class="section" id="events">
+      <div class="card">
+        <div class="card-title">Transfer Event Log</div>
+
+        <div class="filter-bar">
+          <div class="form-group">
+            <label>From Date</label>
+            <input type="date" id="filterFrom">
+          </div>
+          <div class="form-group">
+            <label>To Date</label>
+            <input type="date" id="filterTo">
+          </div>
+          <div class="form-group">
+            <label>Product Code</label>
+            <input type="text" id="filterCode" placeholder="e.g. SEED-BATCH-001">
+          </div>
+          <button class="btn btn-primary btn-sm" id="filterBtn">Filter</button>
+          <button class="btn btn-secondary btn-sm export-btn" id="exportBtn">Export CSV</button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Product</th><th>Name</th><th>From</th><th>To</th><th>Notes</th><th>Date</th><th>Block</th><th>Tx</th></tr>
+            </thead>
+            <tbody id="eventsBody">
+              <tr><td colspan="8" style="text-align:center;color:#6B7280;padding:20px">Apply filters or load all events.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Flags ────────────────────────────────────────────────────────── -->
+    <div class="section" id="flags">
+      <div class="card">
+        <div class="card-title">Flagged Products</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Product</th><th>Name</th><th>Reason</th><th>Flagged By</th><th>Date</th><th>Status</th><th>Action</th></tr>
+            </thead>
+            <tbody id="flagsBody">
+              <tr><td colspan="7" style="text-align:center;color:#6B7280;padding:20px">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Deactivate ────────────────────────────────────────────────────── -->
+    <div class="section" id="deactivate">
+      <div class="card">
+        <div class="card-title">Deactivate Product</div>
+        <p style="font-size:14px;color:var(--gray);margin-bottom:16px">
+          Deactivation marks a product as recalled or counterfeit on-chain. This cannot be reversed.
+        </p>
+        <div class="form-grid single">
+          <div class="form-group">
+            <label>Product Code *</label>
+            <input type="text" id="deactCode" placeholder="e.g. PHARMA-BATCH-002">
+          </div>
+          <div class="form-group">
+            <label>Reason *</label>
+            <textarea id="deactReason" placeholder="Why is this product being deactivated?"></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-danger" id="deactBtn">Deactivate on Chain</button>
+          <span class="status" id="deactStatus"></span>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script type="module">
+import { connectWallet, getWallet, shortenAddress, audit, products, setStatus } from '../shared/api.js';
+
+let wallet = null;
+
+// ── Wallet ────────────────────────────────────────────────────────────────────
+async function connect() {
+  try {
+    wallet = await connectWallet();
+    document.getElementById('walletDisplay').textContent = shortenAddress(wallet);
+    document.getElementById('connectPrompt').style.display = 'none';
+    showSection('overview');
+    loadOverview();
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
+document.getElementById('connectBtn').addEventListener('click', connect);
+document.getElementById('connectBtnMain').addEventListener('click', connect);
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+document.querySelectorAll('.sidebar nav a').forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    if (!wallet) { alert('Connect your wallet first.'); return; }
+    document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'));
+    link.classList.add('active');
+    showSection(link.dataset.section);
+    if (link.dataset.section === 'overview')   loadOverview();
+    if (link.dataset.section === 'events')     loadEvents();
+    if (link.dataset.section === 'flags')      loadFlags();
+  });
+});
+
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(name);
+  if (el) el.classList.add('active');
+}
+
+// ── Overview ──────────────────────────────────────────────────────────────────
+async function loadOverview() {
+  try {
+    const [summary, eventsData] = await Promise.all([
+      audit.summary(wallet),
+      audit.events({ limit: 10 }, wallet),
+    ]);
+
+    document.getElementById('statProducts').textContent  = summary.totalProducts  ?? '—';
+    document.getElementById('statTransfers').textContent = summary.totalTransfers ?? '—';
+    document.getElementById('statFlags').textContent     = summary.openFlags      ?? '—';
+
+    renderEventsTable('overviewEventsBody', eventsData.events || [], 6);
+  } catch (err) {
+    console.error('Overview error:', err);
+  }
+}
+
+function renderEventsTable(tbodyId, events, cols = 8) {
+  const tbody = document.getElementById(tbodyId);
+  if (!events.length) {
+    tbody.innerHTML = `<tr><td colspan="${cols}" style="text-align:center;color:#6B7280;padding:20px">No events found.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = events.map(e => {
+    const short = s => s ? `${s.slice(0, 8)}...` : '—';
+    const txLink = e.tx_hash
+      ? `<a href="https://sepolia.basescan.org/tx/${e.tx_hash}" target="_blank" style="color:var(--mid-blue);font-family:monospace;font-size:11px">${e.tx_hash.slice(0, 10)}...</a>`
+      : '—';
+    if (cols === 6) {
+      return `<tr>
+        <td class="mono" style="font-size:12px">${short(e.product_id)}</td>
+        <td class="mono" style="font-size:12px">${short(e.from_addr)}</td>
+        <td class="mono" style="font-size:12px">${short(e.to_addr)}</td>
+        <td>${e.notes || '—'}</td>
+        <td>${e.recorded_at ? new Date(e.recorded_at).toLocaleDateString() : '—'}</td>
+        <td>${txLink}</td>
+      </tr>`;
+    }
+    return `<tr>
+      <td class="mono" style="font-size:12px">${short(e.product_id)}</td>
+      <td>${e.products?.name || '—'}</td>
+      <td class="mono" style="font-size:12px">${short(e.from_addr)}</td>
+      <td class="mono" style="font-size:12px">${short(e.to_addr)}</td>
+      <td>${e.notes || '—'}</td>
+      <td>${e.recorded_at ? new Date(e.recorded_at).toLocaleString() : '—'}</td>
+      <td>${e.block_number || '—'}</td>
+      <td>${txLink}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Events ────────────────────────────────────────────────────────────────────
+let currentEvents = [];
+
+async function loadEvents(params = {}) {
+  try {
+    const { events } = await audit.events(params, wallet);
+    currentEvents = events || [];
+    renderEventsTable('eventsBody', currentEvents, 8);
+  } catch (err) {
+    console.error('Events error:', err);
+  }
+}
+
+document.getElementById('filterBtn').addEventListener('click', () => {
+  const code = document.getElementById('filterCode').value.trim();
+  const params = {
+    from: document.getElementById('filterFrom').value || undefined,
+    to:   document.getElementById('filterTo').value   || undefined,
+    limit: 200,
+  };
+  if (code) {
+    // Convert code to product_id
+    import('ethers').then(({ id }) => {
+      params.product_id = id(code);
+      loadEvents(params);
+    });
+  } else {
+    loadEvents(params);
+  }
+});
+
+// CSV export
+document.getElementById('exportBtn').addEventListener('click', () => {
+  if (!currentEvents.length) { alert('No events to export.'); return; }
+  const headers = ['product_id', 'from_addr', 'to_addr', 'notes', 'tx_hash', 'block_number', 'recorded_at'];
+  const rows    = currentEvents.map(e => headers.map(h => `"${(e[h] || '').toString().replace(/"/g, '""')}"`).join(','));
+  const csv     = [headers.join(','), ...rows].join('\n');
+  const blob    = new Blob([csv], { type: 'text/csv' });
+  const url     = URL.createObjectURL(blob);
+  const a       = document.createElement('a');
+  a.href        = url;
+  a.download    = `events_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// ── Flags ─────────────────────────────────────────────────────────────────────
+async function loadFlags() {
+  const tbody = document.getElementById('flagsBody');
+  try {
+    const { flags } = await audit.flags(wallet);
+    if (!flags || !flags.length) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#6B7280;padding:20px">No flags found.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = flags.map(f => `<tr>
+      <td class="mono" style="font-size:12px">${f.product_id ? f.product_id.slice(0,10) + '...' : '—'}</td>
+      <td>${f.products?.name || '—'}</td>
+      <td>${f.reason || '—'}</td>
+      <td class="mono" style="font-size:12px">${f.flagged_by ? f.flagged_by.slice(0,10) + '...' : '—'}</td>
+      <td>${f.created_at ? new Date(f.created_at).toLocaleDateString() : '—'}</td>
+      <td><span class="badge ${f.resolved ? 'badge-green' : 'badge-red'}">${f.resolved ? 'Resolved' : 'Open'}</span></td>
+      <td>${!f.resolved ? `<button class="btn btn-secondary btn-sm" onclick="resolveFlag('${f.id}', this)">Resolve</button>` : '—'}</td>
+    </tr>`).join('');
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="7" style="color:red;padding:20px">${err.message}</td></tr>`;
+  }
+}
+
+window.resolveFlag = async (id, btn) => {
+  btn.disabled = true;
+  try {
+    await audit.resolveFlag(id, wallet);
+    loadFlags();
+  } catch (err) {
+    alert(err.message);
+    btn.disabled = false;
+  }
+};
+
+// ── Deactivate ────────────────────────────────────────────────────────────────
+document.getElementById('deactBtn').addEventListener('click', async () => {
+  if (!wallet) return;
+  const code   = document.getElementById('deactCode').value.trim();
+  const reason = document.getElementById('deactReason').value.trim();
+  const status = document.getElementById('deactStatus');
+
+  if (!code || !reason) return setStatus(status, 'Product code and reason are required.', 'error');
+
+  if (!confirm(`Are you sure you want to deactivate "${code}" on-chain? This cannot be reversed.`)) return;
+
+  setStatus(status, 'Sending transaction...', 'loading');
+  document.getElementById('deactBtn').disabled = true;
+
+  try {
+    const res = await products.deactivate(code, reason, wallet);
+    setStatus(status, `Deactivated. Tx: ${res.txHash}`, 'success');
+  } catch (err) {
+    setStatus(status, err.message, 'error');
+  } finally {
+    document.getElementById('deactBtn').disabled = false;
+  }
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(async () => {
+  wallet = await getWallet();
+  if (wallet) {
+    document.getElementById('walletDisplay').textContent = shortenAddress(wallet);
+    document.getElementById('connectPrompt').style.display = 'none';
+    showSection('overview');
+    loadOverview();
+  }
+  if (window.ethereum) {
+    window.ethereum.on('accountsChanged', () => location.reload());
+  }
+})();
+</script>
+</body>
+</html>

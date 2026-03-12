@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Distributor Dashboard — Supply Chain</title>
+  <link rel="stylesheet" href="../shared/style.css">
+  <style>
+    .section { display: none; }
+    .section.active { display: block; }
+  </style>
+</head>
+<body>
+
+<header class="app-header">
+  <h1>Supply Chain — Distributor</h1>
+  <span class="role-badge">DISTRIBUTOR</span>
+  <span class="wallet-display" id="walletDisplay">Not connected</span>
+  <button class="btn btn-secondary btn-sm" id="connectBtn">Connect Wallet</button>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <nav>
+      <a href="#" class="active" data-section="transfer">Record Transfer</a>
+      <a href="#" data-section="lookup">Look Up Product</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+
+    <div id="connectPrompt" class="connect-screen">
+      <h2>Connect your wallet</h2>
+      <p>Connect your MetaMask wallet to access the distributor dashboard.</p>
+      <button class="btn btn-primary" id="connectBtnMain">Connect MetaMask</button>
+    </div>
+
+    <!-- ── Record Transfer ──────────────────────────────────────────────── -->
+    <div class="section" id="transfer">
+      <div class="card">
+        <div class="card-title">Record Custody Transfer</div>
+        <p style="font-size:14px;color:var(--gray);margin-bottom:16px">
+          Record a handover when you pass goods to another party. Both the sender and receiver
+          address are stored on-chain, along with a hash of the location and condition data.
+        </p>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Product Code *</label>
+            <input type="text" id="txCode" placeholder="e.g. SEED-BATCH-001">
+          </div>
+          <div class="form-group">
+            <label>Recipient Address *</label>
+            <input type="text" id="txTo" placeholder="0x...">
+          </div>
+          <div class="form-group">
+            <label>Location</label>
+            <input type="text" id="txLocation" placeholder="e.g. Ndola Depot">
+          </div>
+          <div class="form-group">
+            <label>Condition</label>
+            <input type="text" id="txCondition" placeholder="e.g. 4°C, humidity 60%">
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label>Notes</label>
+            <textarea id="txNotes" placeholder="Notes about this handover..."></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" id="transferBtn">Record Transfer</button>
+          <span class="status" id="transferStatus"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Lookup ───────────────────────────────────────────────────────── -->
+    <div class="section" id="lookup">
+      <div class="card">
+        <div class="card-title">Look Up Product</div>
+        <div class="form-grid single">
+          <div class="form-group">
+            <label>Product Code</label>
+            <div style="display:flex;gap:8px">
+              <input type="text" id="lookupCode" placeholder="e.g. SEED-BATCH-001" style="flex:1">
+              <button class="btn btn-primary" id="lookupBtn">Search</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="lookupResult" style="margin-top:16px;display:none">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Field</th><th>Value</th></tr></thead>
+              <tbody id="lookupMeta"></tbody>
+            </table>
+          </div>
+
+          <div style="margin-top:20px">
+            <div class="card-title">Transfer History</div>
+            <ul class="timeline" id="lookupTimeline"></ul>
+          </div>
+        </div>
+
+        <div id="lookupStatus" class="status"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script type="module">
+import { connectWallet, getWallet, shortenAddress, products, setStatus, formatTimestamp } from '../shared/api.js';
+
+let wallet = null;
+
+async function connect() {
+  try {
+    wallet = await connectWallet();
+    document.getElementById('walletDisplay').textContent = shortenAddress(wallet);
+    document.getElementById('connectPrompt').style.display = 'none';
+    showSection('transfer');
+  } catch (err) { alert(err.message); }
+}
+
+document.getElementById('connectBtn').addEventListener('click', connect);
+document.getElementById('connectBtnMain').addEventListener('click', connect);
+
+document.querySelectorAll('.sidebar nav a').forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    if (!wallet) { alert('Connect wallet first.'); return; }
+    document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'));
+    link.classList.add('active');
+    showSection(link.dataset.section);
+  });
+});
+
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(name);
+  if (el) el.classList.add('active');
+}
+
+document.getElementById('transferBtn').addEventListener('click', async () => {
+  if (!wallet) return;
+  const status = document.getElementById('transferStatus');
+  const code   = document.getElementById('txCode').value.trim();
+  const to     = document.getElementById('txTo').value.trim();
+  if (!code || !to) return setStatus(status, 'Product code and recipient are required.', 'error');
+
+  setStatus(status, 'Sending transaction...', 'loading');
+  document.getElementById('transferBtn').disabled = true;
+
+  try {
+    const res = await products.transfer(code, {
+      toAddress:  to,
+      location:   { raw: document.getElementById('txLocation').value.trim() },
+      condition:  { raw: document.getElementById('txCondition').value.trim() },
+      notes:      document.getElementById('txNotes').value.trim(),
+    }, wallet);
+    setStatus(status, `Recorded. Tx: ${res.txHash}`, 'success');
+  } catch (err) {
+    setStatus(status, err.message, 'error');
+  } finally {
+    document.getElementById('transferBtn').disabled = false;
+  }
+});
+
+document.getElementById('lookupBtn').addEventListener('click', async () => {
+  const code   = document.getElementById('lookupCode').value.trim();
+  const status = document.getElementById('lookupStatus');
+  if (!code) return;
+
+  setStatus(status, 'Looking up...', 'loading');
+  document.getElementById('lookupResult').style.display = 'none';
+
+  try {
+    const { product: p, history } = await products.get(code);
+    if (!p) { setStatus(status, 'Product not found.', 'error'); return; }
+
+    document.getElementById('lookupMeta').innerHTML = [
+      ['Name', p.name || '—'],
+      ['Batch', p.batch_number || '—'],
+      ['Origin', p.origin || '—'],
+      ['Expiry', p.expiry_date || '—'],
+      ['Status', p.is_active === false ? '⚠️ Inactive' : '✅ Active'],
+      ['Manufacturer', p.manufacturer_wallet || '—'],
+    ].map(([k, v]) => `<tr><td style="font-weight:500;width:140px">${k}</td><td>${v}</td></tr>`).join('');
+
+    const tl = document.getElementById('lookupTimeline');
+    tl.innerHTML = (history || []).length
+      ? (history).map(e => `<li>
+          <div class="tl-time">${e.timestamp ? new Date(e.timestamp * 1000).toLocaleString() : '—'}</div>
+          <div class="tl-title">${shortenAddress(e.from)} → ${shortenAddress(e.to)}</div>
+          <div class="tl-detail">${e.notes || 'No notes'}</div>
+        </li>`).join('')
+      : '<li><div class="tl-title">No transfers yet.</div></li>';
+
+    status.style.display = 'none';
+    document.getElementById('lookupResult').style.display = 'block';
+  } catch (err) {
+    setStatus(status, err.message, 'error');
+  }
+});
+
+(async () => {
+  wallet = await getWallet();
+  if (wallet) {
+    document.getElementById('walletDisplay').textContent = shortenAddress(wallet);
+    document.getElementById('connectPrompt').style.display = 'none';
+    showSection('transfer');
+  }
+  if (window.ethereum) window.ethereum.on('accountsChanged', () => location.reload());
+})();
+</script>
+</body>
+</html>
