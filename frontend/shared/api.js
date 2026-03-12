@@ -5,89 +5,40 @@
 
 const API = 'https://supply-chain-backend-a4y7.onrender.com/api';
 
-// ── Web3Modal Setup ───────────────────────────────────────────────────────────
-
-const PROJECT_ID = '37ceb3970a0d4c526cffe3d5f6693252';
-
-const metadata = {
-  name: 'WanzaBlock Supply Chain',
-  description: 'Blockchain-powered supply chain management',
-  url: 'https://wanzablocksupply.vercel.app',
-  icons: ['https://wanzablocksupply.vercel.app/favicon.ico']
-};
-
-// Dynamically load Web3Modal
-let modal = null;
-
-async function getModal() {
-  if (modal) return modal;
-
-  const { createWeb3Modal, defaultConfig } = await import(
-    'https://esm.sh/@web3modal/ethers@4.2.3'
-  );
-
-  const baseSepolia = {
-    chainId: 84532,
-    name: 'Base Sepolia',
-    currency: 'ETH',
-    explorerUrl: 'https://sepolia.basescan.org',
-    rpcUrl: 'https://base-sepolia.g.alchemy.com/v2/BhFH8jdb7OWzKXhPKbPzL'
-  };
-
-  modal = createWeb3Modal({
-    ethersConfig: defaultConfig({ metadata }),
-    chains: [baseSepolia],
-    projectId: PROJECT_ID,
-    themeMode: 'light',
-    themeVariables: {
-      '--w3m-accent': '#1a3a5c',
-    }
-  });
-
-  return modal;
-}
-
 // ── Wallet connection ─────────────────────────────────────────────────────────
 
 export async function connectWallet() {
-  const m = await getModal();
-  await m.open();
-
-  return new Promise((resolve, reject) => {
-    const unsub = m.subscribeProvider(({ isConnected, address, chainId }) => {
-      if (isConnected && address) {
-        unsub();
-        if (chainId !== 84532) {
-          alert('Please switch to Base Sepolia network (Chain ID: 84532)');
-        }
-        resolve(address);
+  if (window.ethereum) {
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+    if (chainId !== '0x14a34') {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x14a34' }],
+        });
+      } catch {
+        alert('Please switch MetaMask to Base Sepolia (Chain ID: 84532)');
       }
-    });
-    // Timeout after 2 minutes
-    setTimeout(() => { unsub(); reject(new Error('Connection timeout')); }, 120000);
-  });
+    }
+    return accounts[0];
+  }
+  // Mobile — redirect to MetaMask deep link
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if (isMobile) {
+    window.location.href = `https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`;
+    return null;
+  }
+  throw new Error('MetaMask not found. Please install it from metamask.io');
 }
 
 export async function getWallet() {
-  try {
-    const m = await getModal();
-    const { isConnected, address } = m.getState();
-    return isConnected ? address : null;
-  } catch {
-    // Fallback to window.ethereum
-    if (!window.ethereum) return null;
-    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-    return accounts[0] || null;
-  }
+  if (!window.ethereum) return null;
+  const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+  return accounts[0] || null;
 }
 
 export async function disconnectWallet() {
-  try {
-    const m = await getModal();
-    await m.disconnect();
-  } catch {
-    // fallback
-  }
   window.location.reload();
 }
 
