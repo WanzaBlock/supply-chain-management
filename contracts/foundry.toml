@@ -11,3 +11,9 @@ remappings = [
 
 [profile.default.fuzz]
 runs = 1000
+
+[rpc_endpoints]
+base_sepolia = "${BASE_SEPOLIA_RPC}"
+
+[etherscan]
+base_sepolia = { key = "${BASESCAN_API_KEY}", url = "https://api-sepolia.basescan.org/api" }

@@ -69,18 +69,21 @@ router.get('/:code', async (req, res) => {
       .eq('product_id', productId)
       .single();
 
-    // Fetch history from chain
-    const history = await supplyChain.getHistory(productId);
-
-    // Map BigInt timestamps to numbers for JSON
-    const events = history.map(e => ({
-      from:          e.from,
-      to:            e.to,
-      timestamp:     Number(e.timestamp),
-      locationHash:  e.locationHash,
-      conditionHash: e.conditionHash,
-      notes:         e.notes,
-    }));
+    // Fetch history from chain (empty array if no transfers yet)
+let events = [];
+try {
+  const history = await supplyChain.getHistory(productId);
+  events = history.map(e => ({
+       from:          e.from,
+    to:            e.to,
+    timestamp:     Number(e.timestamp),
+    locationHash:  e.locationHash,
+    conditionHash: e.conditionHash,
+    notes:         e.notes,
+  }));
+} catch {
+  // No transfers recorded yet
+}
 
     res.json({ product: meta, history: events });
   } catch (err) {
@@ -178,6 +181,7 @@ router.post(
         tx_hash:    receipt.hash,
       });
 
+      await supabase.from("products").update({ is_active: false, deactivated_at: new Date().toISOString() }).eq("product_id", productId);
       res.json({ success: true, txHash: receipt.hash });
     } catch (err) {
       res.status(500).json({ error: err.message });

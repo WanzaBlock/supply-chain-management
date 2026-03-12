@@ -27,3 +27,7 @@ npm-debug.log*
 # live-server
 .cache/
 !.env.example
+
+# Foundry broadcast (contains deployment tx history)
+contracts/broadcast/
+contracts/.env
