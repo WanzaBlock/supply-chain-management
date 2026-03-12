@@ -18,11 +18,15 @@
   <span class="wallet-display" id="walletDisplay">Not connected</span>
   <button class="btn btn-secondary btn-sm" id="connectBtn">Connect Wallet</button>
   <button class="btn btn-danger btn-sm" id="disconnectBtn" style="display:none">Disconnect</button>
+  <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </header>
 
 <div class="layout">
   <aside class="sidebar">
     <nav>
+      <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">&times;</button>
       <a href="#" class="active" data-section="transfer">Record Transfer</a>
       <a href="#" data-section="lookup">Look Up Product</a>
     </nav>
@@ -128,7 +132,23 @@ document.getElementById('connectBtn').addEventListener('click', connect);
 document.getElementById('disconnectBtn').addEventListener('click', () => { wallet = null; document.getElementById('walletDisplay').textContent = 'Not connected'; document.getElementById('connectBtn').style.display = ''; document.getElementById('disconnectBtn').style.display = 'none'; document.getElementById('connectPrompt').style.display = ''; });
 document.getElementById('connectBtnMain').addEventListener('click', connect);
 
-document.querySelectorAll('.sidebar nav a').forEach(link => {
+
+  // ── Mobile sidebar ──────────────────────────────────────────────────────
+  const hamburger = document.getElementById('hamburgerBtn');
+  const sidebarEl = document.querySelector('.sidebar');
+  const overlayEl = document.getElementById('sidebarOverlay');
+  const closeBtn  = document.getElementById('sidebarClose');
+  function openSidebar()  { sidebarEl.classList.add('open'); overlayEl.classList.add('open'); }
+  function closeSidebar() { sidebarEl.classList.remove('open'); overlayEl.classList.remove('open'); }
+  if (hamburger) hamburger.addEventListener('click', openSidebar);
+  if (closeBtn)  closeBtn.addEventListener('click', closeSidebar);
+  if (overlayEl) overlayEl.addEventListener('click', closeSidebar);
+  // Close sidebar when nav link clicked on mobile
+  document.querySelectorAll('.sidebar nav a').forEach(link => {
+    link.addEventListener('click', () => { if (window.innerWidth <= 700) closeSidebar(); });
+  });
+
+  document.querySelectorAll('.sidebar nav a').forEach(link => {
   link.addEventListener('click', e => {
     e.preventDefault();
     if (!wallet) { alert('Connect wallet first.'); return; }
