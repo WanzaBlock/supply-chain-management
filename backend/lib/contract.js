@@ -8,10 +8,10 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // Load ABIs from Foundry output
 function loadABI(contractName) {
   const abiPath = join(__dirname, '..', 'abi', `${contractName}.json`);
-  return JSON.parse(readFileSync(abiPath, 'utf8'));
+  return JSON.parse(readFileSync(abiPath, 'utf8')).abi;
 }
 
-const provider = new JsonRpcProvider(process.env.RPC_URL);
+const provider = new JsonRpcProvider(process.env.ANVIL_RPC_URL);
 const signer   = new Wallet(process.env.PRIVATE_KEY, provider);
 
 export const supplyChain = new Contract(
