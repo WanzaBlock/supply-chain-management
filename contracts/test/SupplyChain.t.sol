@@ -6,6 +6,9 @@ import "../src/SupplyChain.sol";
 import "../src/SupplyChainAccess.sol";
 
 contract SupplyChainTest is Test {
+    event ProductRegistered(bytes32 indexed productId, address indexed manufacturer, string metadataHash);
+    event ProductDeactivated(bytes32 indexed productId);
+    event TransferRecorded(bytes32 indexed productId, address indexed from, address indexed to);
     SupplyChainAccess access;
     SupplyChain       chain;
 
@@ -49,7 +52,7 @@ contract SupplyChainTest is Test {
 
     function test_RegisterProduct_EmitsEvent() public {
         vm.expectEmit(true, true, false, true);
-        emit ISupplyChain.ProductRegistered(PRODUCT_ID, manufacturer, METADATA_HASH);
+        emit ProductRegistered(PRODUCT_ID, manufacturer, METADATA_HASH);
         vm.prank(manufacturer);
         chain.registerProduct(PRODUCT_ID, METADATA_HASH);
     }
@@ -136,7 +139,7 @@ contract SupplyChainTest is Test {
     function test_RecordTransfer_EmitsEvent() public {
         _registerProduct();
         vm.expectEmit(true, true, true, false);
-        emit ISupplyChain.TransferRecorded(PRODUCT_ID, manufacturer, distributor);
+        emit TransferRecorded(PRODUCT_ID, manufacturer, distributor);
         vm.prank(manufacturer);
         chain.recordTransfer(PRODUCT_ID, distributor, LOC_HASH, COND_HASH, "");
     }
@@ -191,7 +194,7 @@ contract SupplyChainTest is Test {
     function test_DeactivateEmitsEvent() public {
         _registerProduct();
         vm.expectEmit(true, false, false, false);
-        emit ISupplyChain.ProductDeactivated(PRODUCT_ID);
+        emit ProductDeactivated(PRODUCT_ID);
         chain.deactivateProduct(PRODUCT_ID);
     }
 

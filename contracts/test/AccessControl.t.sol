@@ -3,8 +3,10 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../src/SupplyChainAccess.sol";
+import "../src/interfaces/IAccessControl.sol";
 
 contract AccessControlTest is Test {
+    event RoleAssigned(address indexed account, bytes32 indexed role);
     SupplyChainAccess access;
     address owner       = address(this);
     address alice       = makeAddr("alice");
@@ -32,7 +34,7 @@ contract AccessControlTest is Test {
 
     function test_AssignRoleEmitsEvent() public {
         vm.expectEmit(true, true, false, false);
-        emit IAccessControl.RoleAssigned(alice, access.MANUFACTURER());
+        emit RoleAssigned(alice, access.MANUFACTURER());
         access.assignRole(alice, access.MANUFACTURER());
     }
 
@@ -53,14 +55,16 @@ contract AccessControlTest is Test {
     // ── Revert cases ─────────────────────────────────────────────────────────
 
     function test_RevertAssignRole_NotOwner() public {
+        bytes32 role = access.MANUFACTURER();
         vm.prank(alice);
         vm.expectRevert("AccessControl: not owner");
-        access.assignRole(bob, access.MANUFACTURER());
+        access.assignRole(bob, role);
     }
 
     function test_RevertAssignRole_ZeroAddress() public {
+        bytes32 role = access.MANUFACTURER();
         vm.expectRevert("AccessControl: zero address");
-        access.assignRole(address(0), access.MANUFACTURER());
+        access.assignRole(address(0), role);
     }
 
     function test_RevertAssignRole_UnknownRole() public {
@@ -87,8 +91,9 @@ contract AccessControlTest is Test {
 
     function testFuzz_NonOwnerCannotAssign(address caller) public {
         vm.assume(caller != owner && caller != address(0));
+        bytes32 role = access.MANUFACTURER();
         vm.prank(caller);
         vm.expectRevert("AccessControl: not owner");
-        access.assignRole(alice, access.MANUFACTURER());
+        access.assignRole(alice, role);
     }
 }
