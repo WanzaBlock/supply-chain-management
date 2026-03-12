@@ -17,6 +17,7 @@
   <span class="role-badge">MANUFACTURER</span>
   <span class="wallet-display" id="walletDisplay">Not connected</span>
   <button class="btn btn-secondary btn-sm" id="connectBtn">Connect Wallet</button>
+  <button class="btn btn-danger btn-sm" id="disconnectBtn" style="display:none">Disconnect</button>
 </header>
 
 <div class="layout">
@@ -188,6 +189,8 @@ async function connect() {
   try {
     wallet = await connectWallet();
     document.getElementById('walletDisplay').textContent = shortenAddress(wallet);
+    document.getElementById('connectBtn').style.display = 'none';
+    document.getElementById('disconnectBtn').style.display = '';
     document.getElementById('connectPrompt').style.display = 'none';
     showSection('overview');
     loadOverview();
@@ -197,6 +200,7 @@ async function connect() {
 }
 
 document.getElementById('connectBtn').addEventListener('click', connect);
+document.getElementById('disconnectBtn').addEventListener('click', () => { wallet = null; document.getElementById('walletDisplay').textContent = 'Not connected'; document.getElementById('connectBtn').style.display = ''; document.getElementById('disconnectBtn').style.display = 'none'; document.getElementById('connectPrompt').style.display = ''; });
 document.getElementById('connectBtnMain').addEventListener('click', connect);
 
 // ── Navigation ────────────────────────────────────────────────────────────────
@@ -336,6 +340,8 @@ async function loadProducts() {
   wallet = await getWallet();
   if (wallet) {
     document.getElementById('walletDisplay').textContent = shortenAddress(wallet);
+    document.getElementById('connectBtn').style.display = 'none';
+    document.getElementById('disconnectBtn').style.display = '';
     document.getElementById('connectPrompt').style.display = 'none';
     showSection('overview');
     loadOverview();

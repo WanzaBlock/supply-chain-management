@@ -1,6 +1,5 @@
 /**
  * shared/api.js — Shared API client and wallet helpers
- * Used by all three dashboards.
  */
 
 const API = 'https://supply-chain-backend-a4y7.onrender.com/api';
@@ -8,8 +7,25 @@ const API = 'https://supply-chain-backend-a4y7.onrender.com/api';
 // ── Wallet connection ─────────────────────────────────────────────────────────
 
 export async function connectWallet() {
-  if (!window.ethereum) throw new Error('MetaMask not found. Please install it.');
+  if (!window.ethereum) {
+    // On mobile, redirect to MetaMask browser
+    const currentUrl = window.location.href;
+    const metamaskDeepLink = `https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`;
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+      window.location.href = metamaskDeepLink;
+      return null;
+    }
+    throw new Error('MetaMask not found. Please install it.');
+  }
   const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+  // Check network — warn if not Base Sepolia (84532)
+  const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+  if (chainId !== '0x14a34') {
+    alert('Please switch MetaMask to Base Sepolia network (Chain ID: 84532)');
+  }
+
   return accounts[0];
 }
 
@@ -17,6 +33,13 @@ export async function getWallet() {
   if (!window.ethereum) return null;
   const accounts = await window.ethereum.request({ method: 'eth_accounts' });
   return accounts[0] || null;
+}
+
+export async function disconnectWallet() {
+  // Clear any cached wallet state
+  localStorage.removeItem('walletConnected');
+  // Reload page to reset UI state
+  window.location.reload();
 }
 
 export function shortenAddress(addr) {
