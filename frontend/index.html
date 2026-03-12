@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WanzaBlock — Blockchain Supply Chain</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:       #1A3A5C;
+      --terracotta: #C4632A;
+      --forest:     #1A3D2B;
+      --gold:       #D4A017;
+      --cream:      #FAF7F2;
+      --cream-dark: #EFE6D5;
+      --white:      #FFFFFF;
+      --gray:       #6B7280;
+      --text:       #1C1C1C;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 48px;
+      height: 64px;
+      background: rgba(26,58,92,0.97);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.2);
+    }
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--white);
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--gold); }
+    .nav-links { display: flex; gap: 32px; align-items: center; }
+    .nav-links a {
+      color: rgba(255,255,255,0.75);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 400;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--white); }
+    .nav-cta {
+      background: var(--terracotta) !important;
+      color: var(--white) !important;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-weight: 500 !important;
+      transition: background 0.2s !important;
+    }
+    .nav-cta:hover { background: #a8511e !important; }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--blue) 0%, #0f2338 60%, var(--forest) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 100px 24px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(45deg, transparent, transparent 60px, rgba(212,160,23,0.04) 60px, rgba(212,160,23,0.04) 61px),
+        repeating-linear-gradient(-45deg, transparent, transparent 60px, rgba(196,99,42,0.04) 60px, rgba(196,99,42,0.04) 61px);
+    }
+    .hero-content { position: relative; max-width: 780px; }
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(212,160,23,0.15);
+      border: 1px solid rgba(212,160,23,0.3);
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 20px;
+      margin-bottom: 28px;
+    }
+    .hero-tag::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--gold);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(40px, 7vw, 72px);
+      font-weight: 900;
+      color: var(--white);
+      line-height: 1.1;
+      margin-bottom: 24px;
+    }
+    .hero h1 span { color: var(--terracotta); }
+    .hero p {
+      font-size: clamp(16px, 2vw, 19px);
+      color: rgba(255,255,255,0.7);
+      line-height: 1.7;
+      max-width: 580px;
+      margin: 0 auto 40px;
+    }
+    .hero-btns {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-hero-primary {
+      background: var(--terracotta);
+      color: var(--white);
+      padding: 14px 32px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      box-shadow: 0 4px 20px rgba(196,99,42,0.4);
+      transition: all 0.2s;
+    }
+    .btn-hero-primary:hover { background: #a8511e; transform: translateY(-2px); box-shadow: 0 8px 28px rgba(196,99,42,0.5); }
+    .btn-hero-secondary {
+      background: rgba(255,255,255,0.1);
+      color: var(--white);
+      padding: 14px 32px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 500;
+      border: 1px solid rgba(255,255,255,0.2);
+      transition: all 0.2s;
+    }
+    .btn-hero-secondary:hover { background: rgba(255,255,255,0.18); transform: translateY(-2px); }
+
+    /* ── Stats Bar ── */
+    .stats-bar {
+      background: var(--white);
+      border-bottom: 1px solid var(--cream-dark);
+      padding: 28px 48px;
+      display: flex;
+      justify-content: center;
+      gap: 64px;
+      flex-wrap: wrap;
+    }
+    .stat-item { text-align: center; }
+    .stat-item .num {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--blue);
+    }
+    .stat-item .lbl {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-top: 4px;
+    }
+
+    /* ── Sections ── */
+    section { padding: 88px 48px; }
+    .section-tag {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--terracotta);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 700;
+      color: var(--blue);
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 16px;
+      color: var(--gray);
+      line-height: 1.7;
+      max-width: 540px;
+    }
+    .section-header { margin-bottom: 56px; }
+
+    /* ── How It Works ── */
+    #how { background: var(--cream); }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 28px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .step-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 32px 28px;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .step-card:hover { transform: translateY(-4px); box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
+    .step-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 48px;
+      font-weight: 900;
+      color: rgba(196,99,42,0.12);
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+    .step-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--terracotta), var(--gold));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .step-icon svg { width: 22px; height: 22px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .step-card h3 { font-size: 16px; font-weight: 600; color: var(--blue); margin-bottom: 8px; }
+    .step-card p  { font-size: 14px; color: var(--gray); line-height: 1.6; }
+
+    /* ── Roles ── */
+    #roles { background: var(--blue); }
+    #roles .section-title { color: var(--white); }
+    #roles .section-sub   { color: rgba(255,255,255,0.6); }
+    #roles .section-tag   { color: var(--gold); }
+    .roles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .role-card {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 32px 28px;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .role-card:hover {
+      background: rgba(255,255,255,0.12);
+      border-color: var(--terracotta);
+      transform: translateY(-3px);
+    }
+    .role-badge-lg {
+      display: inline-block;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .badge-manufacturer { background: rgba(196,99,42,0.25); color: #F4A76A; }
+    .badge-distributor  { background: rgba(37,99,235,0.25);  color: #93C5FD; }
+    .badge-regulator    { background: rgba(212,160,23,0.25); color: #FCD34D; }
+    .badge-consumer     { background: rgba(22,163,74,0.25);  color: #86EFAC; }
+    .role-card h3 { font-size: 18px; font-weight: 600; color: var(--white); margin-bottom: 10px; }
+    .role-card p  { font-size: 14px; color: rgba(255,255,255,0.55); line-height: 1.6; margin-bottom: 20px; }
+    .role-link {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--terracotta);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .role-link svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.2s; }
+    .role-card:hover .role-link svg { transform: translateX(4px); }
+
+    /* ── Tech Stack ── */
+    #tech { background: var(--cream); }
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .tech-item {
+      background: var(--white);
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+    }
+    .tech-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .tech-item .name  { font-size: 14px; font-weight: 600; color: var(--blue); }
+    .tech-item .layer { font-size: 12px; color: var(--gray); }
+
+    /* ── CTA ── */
+    #cta {
+      background: linear-gradient(135deg, var(--forest) 0%, var(--blue) 100%);
+      text-align: center;
+      padding: 88px 48px;
+    }
+    #cta .section-title { color: var(--white); }
+    #cta p { color: rgba(255,255,255,0.65); font-size: 16px; margin: 0 auto 40px; max-width: 480px; line-height: 1.7; }
+
+    /* ── Footer ── */
+    footer {
+      background: #0d1f2d;
+      color: rgba(255,255,255,0.45);
+      text-align: center;
+      padding: 28px 48px;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    footer a { color: rgba(255,255,255,0.45); text-decoration: none; }
+    footer a:hover { color: var(--white); }
+    .footer-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.7);
+    }
+    .footer-logo span { color: var(--gold); }
+
+    /* ── Contract addresses ── */
+    .contracts {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 24px 28px;
+      max-width: 700px;
+      margin: 40px auto 0;
+      text-align: left;
+    }
+    .contracts h4 { font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
+    .contract-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.07); gap: 12px; flex-wrap: wrap; }
+    .contract-row:last-child { border-bottom: none; }
+    .contract-row .label { font-size: 13px; color: rgba(255,255,255,0.6); }
+    .contract-row .addr  { font-family: monospace; font-size: 12px; color: rgba(255,255,255,0.85); }
+    .contract-row a { color: var(--gold); font-size: 12px; text-decoration: none; white-space: nowrap; }
+    .contract-row a:hover { text-decoration: underline; }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      section { padding: 60px 20px; }
+      .stats-bar { gap: 32px; padding: 24px 20px; }
+      footer { flex-direction: column; text-align: center; }
+    }
+
+    /* ── Animations ── */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+<!-- ── Navigation ─────────────────────────────────────────────────────────── -->
+<nav>
+  <a class="nav-logo" href="#">Wanza<span>Block</span></a>
+  <div class="nav-links">
+    <a href="#how">How It Works</a>
+    <a href="#roles">Dashboards</a>
+    <a href="#tech">Technology</a>
+    <a href="https://sepolia.basescan.org/address/0x4a698d6a6988Fd84BA101c07Ad36E7Da4a7ab666" target="_blank">Contract</a>
+    <a href="consumer/" class="nav-cta">Verify Product</a>
+  </div>
+</nav>
+
+<!-- ── Hero ───────────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-tag">Live on Base Sepolia Testnet</div>
+    <h1>Supply Chain<br><span>Transparency</span><br>on the Blockchain</h1>
+    <p>WanzaBlock brings full traceability to agricultural and pharmaceutical supply chains — from manufacturer to consumer — powered by smart contracts on Base.</p>
+    <div class="hero-btns">
+      <a href="consumer/" class="btn-hero-primary">Verify a Product</a>
+      <a href="#roles" class="btn-hero-secondary">View Dashboards</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Stats Bar ──────────────────────────────────────────────────────────── -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <div class="num">4</div>
+    <div class="lbl">Roles</div>
+  </div>
+  <div class="stat-item">
+    <div class="num">100%</div>
+    <div class="lbl">On-Chain Audit Trail</div>
+  </div>
+  <div class="stat-item">
+    <div class="num">Base</div>
+    <div class="lbl">Network</div>
+  </div>
+  <div class="stat-item">
+    <div class="num">QR</div>
+    <div class="lbl">Consumer Verification</div>
+  </div>
+</div>
+
+<!-- ── How It Works ───────────────────────────────────────────────────────── -->
+<section id="how">
+  <div class="section-header fade-up">
+    <div class="section-tag">Process</div>
+    <h2 class="section-title">How It Works</h2>
+    <p class="section-sub">Every product batch is registered on-chain and tracked at every step of its journey.</p>
+  </div>
+  <div class="steps">
+    <div class="step-card fade-up">
+      <div class="step-icon">
+        <svg viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+      </div>
+      <div class="step-num">01</div>
+      <h3>Register Batch</h3>
+      <p>Manufacturer registers a product batch on-chain with origin, expiry, and metadata stored immutably.</p>
+    </div>
+    <div class="step-card fade-up">
+      <div class="step-icon">
+        <svg viewBox="0 0 24 24"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><rect x="9" y="11" width="14" height="10" rx="1"/><circle cx="12" cy="21" r="1"/><circle cx="20" cy="21" r="1"/></svg>
+      </div>
+      <div class="step-num">02</div>
+      <h3>Transfer Custody</h3>
+      <p>Each handoff between manufacturer, distributor, and retailer is recorded as an on-chain transfer event.</p>
+    </div>
+    <div class="step-card fade-up">
+      <div class="step-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div class="step-num">03</div>
+      <h3>Regulatory Audit</h3>
+      <p>Regulators monitor the full chain of custody, export audit logs, and flag or deactivate products.</p>
+    </div>
+    <div class="step-card fade-up">
+      <div class="step-icon">
+        <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      </div>
+      <div class="step-num">04</div>
+      <h3>Consumer Verify</h3>
+      <p>Consumers scan a QR code or enter a product code to instantly see the full verified history.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Roles ───────────────────────────────────────────────────────────────── -->
+<section id="roles">
+  <div class="section-header fade-up" style="max-width:1100px;margin-left:auto;margin-right:auto">
+    <div class="section-tag">Access</div>
+    <h2 class="section-title">Role-Based Dashboards</h2>
+    <p class="section-sub">Each participant connects with their MetaMask wallet and is granted access based on their assigned role.</p>
+  </div>
+  <div class="roles-grid">
+    <a href="manufacturer/" class="role-card fade-up">
+      <div class="role-badge-lg badge-manufacturer">Manufacturer</div>
+      <h3>Production Portal</h3>
+      <p>Register product batches, initiate transfers, view your full product history and generate QR codes.</p>
+      <div class="role-link">Open Dashboard <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    </a>
+    <a href="distributor/" class="role-card fade-up">
+      <div class="role-badge-lg badge-distributor">Distributor</div>
+      <h3>Distribution Hub</h3>
+      <p>Record incoming and outgoing transfers, track shipments across the supply chain network.</p>
+      <div class="role-link">Open Dashboard <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    </a>
+    <a href="regulator/" class="role-card fade-up">
+      <div class="role-badge-lg badge-regulator">Regulator</div>
+      <h3>Compliance Centre</h3>
+      <p>Full audit trail access, product flagging, deactivation controls and exportable compliance reports.</p>
+      <div class="role-link">Open Dashboard <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    </a>
+    <a href="consumer/" class="role-card fade-up">
+      <div class="role-badge-lg badge-consumer">Consumer</div>
+      <h3>Product Verification</h3>
+      <p>Scan a QR code or enter a product code to verify authenticity and view the full chain of custody.</p>
+      <div class="role-link">Open Dashboard <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    </a>
+  </div>
+</section>
+
+<!-- ── Tech Stack ─────────────────────────────────────────────────────────── -->
+<section id="tech">
+  <div class="section-header fade-up">
+    <div class="section-tag">Technology</div>
+    <h2 class="section-title">Built On</h2>
+    <p class="section-sub">A modern, production-grade stack from smart contracts to frontend.</p>
+  </div>
+  <div class="tech-grid">
+    <div class="tech-item fade-up"><div class="tech-dot" style="background:#C4632A"></div><div><div class="name">Solidity 0.8.20</div><div class="layer">Smart Contracts</div></div></div>
+    <div class="tech-item fade-up"><div class="tech-dot" style="background:#1A3A5C"></div><div><div class="name">Foundry</div><div class="layer">Contract Toolchain</div></div></div>
+    <div class="tech-item fade-up"><div class="tech-dot" style="background:#0052FF"></div><div><div class="name">Base Sepolia</div><div class="layer">EVM Blockchain</div></div></div>
+    <div class="tech-item fade-up"><div class="tech-dot" style="background:#3ECF8E"></div><div><div class="name">Supabase</div><div class="layer">Database</div></div></div>
+    <div class="tech-item fade-up"><div class="tech-dot" style="background:#000000"></div><div><div class="name">Node.js</div><div class="layer">Backend API</div></div></div>
+    <div class="tech-item fade-up"><div class="tech-dot" style="background:#E44D26"></div><div><div class="name">HTML / CSS / JS</div><div class="layer">Frontend</div></div></div>
+    <div class="tech-item fade-up"><div class="tech-dot" style="background:#000000"></div><div><div class="name">Vercel</div><div class="layer">Frontend Hosting</div></div></div>
+    <div class="tech-item fade-up"><div class="tech-dot" style="background:#46E3B7"></div><div><div class="name">Render</div><div class="layer">Backend Hosting</div></div></div>
+    <div class="tech-item fade-up"><div class="tech-dot" style="background:#E2761B"></div><div><div class="name">MetaMask</div><div class="layer">Wallet Connection</div></div></div>
+  </div>
+</section>
+
+<!-- ── CTA ────────────────────────────────────────────────────────────────── -->
+<section id="cta">
+  <h2 class="section-title fade-up">Ready to Verify a Product?</h2>
+  <p class="fade-up">No wallet needed. Enter any product code or scan a QR code to see its full blockchain-verified history.</p>
+  <a href="consumer/" class="btn-hero-primary fade-up">Verify Now</a>
+  <div class="contracts fade-up">
+    <h4>Live Smart Contracts — Base Sepolia</h4>
+    <div class="contract-row">
+      <span class="label">SupplyChain</span>
+      <span class="addr">0x4a698d6a...ab666</span>
+      <a href="https://sepolia.basescan.org/address/0x4a698d6a6988Fd84BA101c07Ad36E7Da4a7ab666" target="_blank">View on Basescan ↗</a>
+    </div>
+    <div class="contract-row">
+      <span class="label">SupplyChainAccess</span>
+      <span class="addr">0x085b363A...3AcF</span>
+      <a href="https://sepolia.basescan.org/address/0x085b363A5Af3b9d82f13b3a45fd26F452e7b3AcF" target="_blank">View on Basescan ↗</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ─────────────────────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-logo">Wanza<span>Block</span></div>
+  <div>Blockchain Supply Chain Management &mdash; Base Sepolia Testnet</div>
+  <div>
+    <a href="https://github.com/wanzablock/supply-chain-management" target="_blank">GitHub</a>
+    &nbsp;&middot;&nbsp;
+    <a href="https://sepolia.basescan.org/address/0x4a698d6a6988Fd84BA101c07Ad36E7Da4a7ab666" target="_blank">Basescan</a>
+  </div>
+</footer>
+
+<script>
+  // Scroll fade-in animation
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
