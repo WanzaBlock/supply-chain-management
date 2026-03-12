@@ -342,6 +342,7 @@ async function loadProducts() {
       <td>${p.expiry_date || '—'}</td>
       <td><span class="badge ${p.is_active === false ? 'badge-red' : 'badge-green'}">${p.is_active === false ? 'Inactive' : 'Active'}</span></td>
       <td class="mono"><a href="https://sepolia.basescan.org/tx/${p.tx_hash}" target="_blank" style="color:var(--mid-blue);font-size:11px">${p.tx_hash ? p.tx_hash.slice(0, 10) + '...' : '—'}</a></td>
+      <td><button class="btn btn-secondary btn-sm" onclick="showQR('${p.product_code}','${p.name}')">QR</button></td>
     </tr>`).join('');
   } catch (err) {
     tbody.innerHTML = `<tr><td colspan="7" style="color:red;padding:20px">${err.message}</td></tr>`;
