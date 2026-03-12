@@ -124,3 +124,12 @@ export function setStatus(el, msg, type = 'info') {
   el.textContent = msg;
   el.className   = `status ${type}`;
 }
+
+// ── Account switch listener ───────────────────────────────────────────────────
+export function onAccountChanged(callback) {
+  if (window.ethereum) {
+    window.ethereum.on('accountsChanged', (accounts) => {
+      callback(accounts[0] || null);
+    });
+  }
+}

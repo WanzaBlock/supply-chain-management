@@ -327,6 +327,27 @@ if (codeParam) {
   initScanner();
 }
 
+
+  // Auto-update when user switches MetaMask account
+  if (window.ethereum) {
+    window.ethereum.on('accountsChanged', (accounts) => {
+      wallet = accounts[0] || null;
+      if (wallet) {
+        document.getElementById('walletDisplay').textContent = shortenAddress(wallet);
+        document.getElementById('connectBtn').style.display = 'none';
+        document.getElementById('disconnectBtn').style.display = '';
+        document.getElementById('connectPrompt').style.display = 'none';
+        loadDashboard();
+      } else {
+        wallet = null;
+        document.getElementById('walletDisplay').textContent = 'Not connected';
+        document.getElementById('connectBtn').style.display = '';
+        document.getElementById('disconnectBtn').style.display = 'none';
+        document.getElementById('connectPrompt').style.display = '';
+      }
+    });
+  }
+
 </script>
 </body>
 </html>
