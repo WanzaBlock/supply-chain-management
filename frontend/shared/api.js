@@ -3,7 +3,7 @@
  * Used by all three dashboards.
  */
 
-const API = 'http://localhost:3000/api';
+const API = 'https://supply-chain-backend-a4y7.onrender.com/api';
 
 // ── Wallet connection ─────────────────────────────────────────────────────────
 
