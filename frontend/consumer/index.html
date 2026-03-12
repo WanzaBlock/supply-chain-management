@@ -272,12 +272,12 @@ function renderProduct(p, history) {
   }
 
   timeline.innerHTML = history.map(e => `<li>
-    <div class="tl-time">${e.recorded_at ? new Date(e.recorded_at).toLocaleString() : '—'}</div>
+    <div class="tl-time">${e.timestamp ? new Date(e.timestamp * 1000).toLocaleString() : (e.recorded_at ? new Date(e.recorded_at).toLocaleString() : '—')}</div>
     <div class="tl-title">
-      ${shortenAddress(e.from_addr)} → ${shortenAddress(e.to_addr)}
+      ${shortenAddress(e.from || e.from_addr || "")} → ${shortenAddress(e.to || e.to_addr || "")}
     </div>
     <div class="tl-detail">${e.notes || 'No notes'}</div>
-    <div class="tl-hash">Tx: <a href="https://sepolia.basescan.org/tx/${e.tx_hash}" target="_blank" style="color:var(--mid-blue)">${e.tx_hash ? e.tx_hash.slice(0, 18) + '...' : '—'}</a></div>
+    <div class="tl-hash">${e.tx_hash ? `Tx: <a href="https://sepolia.basescan.org/tx/${e.tx_hash}" target="_blank" style="color:var(--mid-blue)">${e.tx_hash.slice(0,18)}...</a>` : ''}</div>
   </li>`).join('');
 }
 
