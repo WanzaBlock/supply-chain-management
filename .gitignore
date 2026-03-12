@@ -26,3 +26,4 @@ npm-debug.log*
 
 # live-server
 .cache/
+!.env.example
