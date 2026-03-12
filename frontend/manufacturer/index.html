@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Manufacturer Dashboard — Supply Chain</title>
   <link rel="stylesheet" href="../shared/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js">function showQR(code, name) {
+  const url = `https://wanzablocksupply.vercel.app/consumer/?code=${encodeURIComponent(code)}`;
+  document.getElementById("qrTitle").textContent = name;
+  document.getElementById("qrUrl").textContent = url;
+  document.getElementById("qrCode").innerHTML = "";
+  new QRCode(document.getElementById("qrCode"), { text: url, width: 200, height: 200 });
+  const modal = document.getElementById("qrModal");
+  modal.style.display = "flex";
+}
+</script>
   <style>
     .section { display: none; }
     .section.active { display: block; }
@@ -67,6 +77,7 @@
                 <th>Batch</th>
                 <th>Registered</th>
                 <th>Status</th>
+                <th>QR</th>
               </tr>
             </thead>
             <tbody id="recentBody">
@@ -165,6 +176,7 @@
                 <th>Batch</th>
                 <th>Expiry</th>
                 <th>Status</th>
+                <th>QR</th>
                 <th>Tx</th>
               </tr>
             </thead>
@@ -354,6 +366,24 @@ async function loadProducts() {
     });
   }
 })();
+function showQR(code, name) {
+  const url = `https://wanzablocksupply.vercel.app/consumer/?code=${encodeURIComponent(code)}`;
+  document.getElementById("qrTitle").textContent = name;
+  document.getElementById("qrUrl").textContent = url;
+  document.getElementById("qrCode").innerHTML = "";
+  new QRCode(document.getElementById("qrCode"), { text: url, width: 200, height: 200 });
+  const modal = document.getElementById("qrModal");
+  modal.style.display = "flex";
+}
 </script>
+<!-- QR Modal -->
+<div id="qrModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:12px;padding:32px;text-align:center;max-width:320px;width:90%">
+    <h3 id="qrTitle" style="margin-bottom:16px;color:#1a3a5c"></h3>
+    <div id="qrCode" style="display:flex;justify-content:center;margin-bottom:16px"></div>
+    <p id="qrUrl" style="font-size:11px;color:#6B7280;word-break:break-all;margin-bottom:16px"></p>
+    <button onclick="document.getElementById('qrModal').style.display='none';document.getElementById('qrCode').innerHTML=''" class="btn btn-secondary">Close</button>
+  </div>
+</div>
 </body>
 </html>

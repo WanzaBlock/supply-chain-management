@@ -302,10 +302,28 @@ document.getElementById('manualCode').addEventListener('keypress', e => {
 document.getElementById('scanAgainBtn').addEventListener('click', () => {
   document.getElementById('result').style.display = 'none';
   document.getElementById('manualCode').value = '';
+  // Auto-lookup from URL param
+const urlParams = new URLSearchParams(window.location.search);
+const codeParam = urlParams.get("code");
+if (codeParam) {
+  document.getElementById("manualCode").value = codeParam;
+  lookupProduct(codeParam);
+} else {
   initScanner();
+}
+
 });
 
-initScanner();
+// Auto-lookup from URL param
+const urlParams = new URLSearchParams(window.location.search);
+const codeParam = urlParams.get("code");
+if (codeParam) {
+  document.getElementById("manualCode").value = codeParam;
+  lookupProduct(codeParam);
+} else {
+  initScanner();
+}
+
 </script>
 </body>
 </html>
