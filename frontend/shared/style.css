@@ -276,9 +276,3 @@ tbody td.mono { font-family: monospace; font-size: 12px; }
   .sidebar { display: none; }
   .form-grid { grid-template-columns: 1fr; }
 }
-
-/* ── Nav SVG Icons ──────────────────────────────────────────────────────── */
-.nav-icon { display: flex; align-items: center; opacity: 0.75; flex-shrink: 0; }
-.sidebar nav a:hover .nav-icon,
-.sidebar nav a.active .nav-icon { opacity: 1; }
-.connect-icon svg { width: 56px; height: 56px; }
