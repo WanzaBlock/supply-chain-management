@@ -26,8 +26,12 @@ app.use((err, req, res, _next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Supply chain API running on port ${PORT}`);
-  console.log(`Chain:    ${process.env.RPC_URL}`);
-  console.log(`Contract: ${process.env.SUPPLY_CHAIN_ADDRESS}`);
-});
+export default app;
+
+if (process.env.NODE_ENV !== 'lambda') {
+  app.listen(PORT, () => {
+    console.log(`Supply chain API running on port ${PORT}`);
+    console.log(`Chain:    ${process.env.RPC_URL}`);
+    console.log(`Contract: ${process.env.SUPPLY_CHAIN_ADDRESS}`);
+  });
+}
