@@ -450,6 +450,15 @@
     </div>
     <div class="scan-card-body">
       <div id="reader" style="width:100%;max-width:320px;margin:0 auto;border-radius:8px;overflow:hidden;"></div>
+      <div style="text-align:center;margin-top:14px">
+        <button class="btn-lookup" id="startScanBtn" style="background:var(--blue);box-shadow:none;display:inline-flex;align-items:center;gap:8px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h.01M14 17h.01M17 14h.01M17 17h.01M20 14h.01M20 17h.01M20 20h.01M17 20h.01M14 20h.01"/></svg>
+          Start Scanning
+        </button>
+        <button class="btn-lookup" id="stopScanBtn" style="background:#6B7280;box-shadow:none;display:none;align-items:center;gap:8px;margin-left:8px">
+          Stop
+        </button>
+      </div>
       <div class="divider">or enter code manually</div>
       <div class="lookup-row">
         <input type="text" id="manualCode" placeholder="e.g. SEED-BATCH-001" autocomplete="off" />
@@ -662,7 +671,22 @@ document.getElementById('manualCode').addEventListener('keypress', e => {
 document.getElementById('scanAgainBtn').addEventListener('click', async () => {
   document.getElementById('result').style.display = 'none';
   document.getElementById('manualCode').value = '';
+  document.getElementById('reader').innerHTML = '';
+  document.getElementById('startScanBtn').style.display = 'inline-flex';
+  document.getElementById('stopScanBtn').style.display = 'none';
+});
+
+// Start/Stop scan buttons
+document.getElementById('startScanBtn').addEventListener('click', async () => {
+  document.getElementById('startScanBtn').style.display = 'none';
+  document.getElementById('stopScanBtn').style.display  = 'inline-flex';
   await initScanner();
+});
+document.getElementById('stopScanBtn').addEventListener('click', async () => {
+  if (scanner) { try { await scanner.stop(); } catch {} scanner = null; }
+  document.getElementById('reader').innerHTML = '';
+  document.getElementById('startScanBtn').style.display = 'inline-flex';
+  document.getElementById('stopScanBtn').style.display  = 'none';
 });
 
 // Auto-lookup from URL param
@@ -671,8 +695,6 @@ const codeParam = urlParams.get('code');
 if (codeParam) {
   document.getElementById('manualCode').value = codeParam;
   lookupProduct(codeParam);
-} else {
-  initScanner();
 }
 </script>
 </body>
