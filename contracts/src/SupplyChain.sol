@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.20;
+pragma solidity 0.8.33;
 
 import "./interfaces/ISupplyChain.sol";
 import "./SupplyChainAccess.sol";
@@ -44,13 +44,15 @@ contract SupplyChain is ISupplyChain {
     {
         require(productId != bytes32(0),            "SupplyChain: empty product id");
         require(bytes(metadataHash).length > 0,     "SupplyChain: empty metadata hash");
-        require(_products[productId].registeredAt == 0, "SupplyChain: already registered");
+        // slither-disable-next-line timestamp
+        require(!_products[productId].exists, "SupplyChain: already registered");
 
         _products[productId] = Product({
             id:           productId,
             manufacturer: msg.sender,
             metadataHash: metadataHash,
             isActive:     true,
+            exists:       true,
             registeredAt: block.timestamp
         });
 
@@ -104,7 +106,8 @@ contract SupplyChain is ISupplyChain {
             access.hasRole(msg.sender, access.REGULATOR()),
             "SupplyChain: not authorized to deactivate"
         );
-        require(_products[productId].registeredAt != 0, "SupplyChain: product not found");
+        // slither-disable-next-line timestamp
+        require(_products[productId].exists, "SupplyChain: product not found");
         _products[productId].isActive = false;
         emit ProductDeactivated(productId);
     }
@@ -112,7 +115,8 @@ contract SupplyChain is ISupplyChain {
     // ─── View functions ─────────────────────────────────────────────────────
 
     function getProduct(bytes32 productId) external view returns (Product memory) {
-        require(_products[productId].registeredAt != 0, "SupplyChain: not found");
+        // slither-disable-next-line timestamp
+        require(_products[productId].exists, "SupplyChain: not found");
         return _products[productId];
     }
 
@@ -121,7 +125,7 @@ contract SupplyChain is ISupplyChain {
     }
 
     function productExists(bytes32 productId) external view returns (bool) {
-        return _products[productId].registeredAt != 0;
+        return _products[productId].exists;
     }
 
     function getTransferCount(bytes32 productId) external view returns (uint256) {

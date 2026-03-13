@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.20;
+pragma solidity 0.8.33;
 
 interface ISupplyChain {
     struct Product {
@@ -7,6 +7,7 @@ interface ISupplyChain {
         address manufacturer;
         string  metadataHash;
         bool    isActive;
+        bool    exists;
         uint256 registeredAt;
     }
 
