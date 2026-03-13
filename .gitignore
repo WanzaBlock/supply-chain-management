@@ -31,3 +31,4 @@ npm-debug.log*
 # Foundry broadcast (contains deployment tx history)
 contracts/broadcast/
 contracts/.env
+.env
