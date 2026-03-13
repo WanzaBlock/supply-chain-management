@@ -14,7 +14,6 @@
   </style>
 </head>
 <body>
-
 <header class="app-header">
   <h1>Supply Chain — Regulator</h1>
   <span class="role-badge">REGULATOR</span>
@@ -25,7 +24,6 @@
     <span></span><span></span><span></span>
   </button>
 </header>
-
 <div class="layout">
   <aside class="sidebar">
     <nav>
@@ -34,18 +32,16 @@
       <a href="#" data-section="events">All Events</a>
       <a href="#" data-section="flags">Flags</a>
       <a href="#" data-section="deactivate">Deactivate Product</a>
+      <a href="#" data-section="users">Manage Users</a>
     </nav>
   </aside>
-
   <main class="main">
-
     <!-- ── Connect prompt ──────────────────────────────────────────────── -->
     <div id="connectPrompt" class="connect-screen">
       <h2>Connect your wallet</h2>
       <p>Connect your MetaMask wallet to access the regulator dashboard.</p>
       <button class="btn btn-primary" id="connectBtnMain">Connect MetaMask</button>
     </div>
-
     <div id="dashboardContent" style="display:none">
     <!-- ── Overview ────────────────────────────────────────────────────── -->
     <div class="section" id="overview">
@@ -63,7 +59,6 @@
           <div class="stat-label">Open Flags</div>
         </div>
       </div>
-
       <div class="card">
         <div class="card-title">Recent Transfer Events</div>
         <div class="table-wrap">
@@ -78,12 +73,10 @@
         </div>
       </div>
     </div>
-
     <!-- ── All Events ───────────────────────────────────────────────────── -->
     <div class="section" id="events">
       <div class="card">
         <div class="card-title">Transfer Event Log</div>
-
         <div class="filter-bar">
           <div class="form-group">
             <label>From Date</label>
@@ -100,7 +93,6 @@
           <button class="btn btn-primary btn-sm" id="filterBtn">Filter</button>
           <button class="btn btn-secondary btn-sm export-btn" id="exportBtn">Export CSV</button>
         </div>
-
         <div class="table-wrap">
           <table>
             <thead>
@@ -113,7 +105,6 @@
         </div>
       </div>
     </div>
-
     <!-- ── Flags ────────────────────────────────────────────────────────── -->
     <div class="section" id="flags">
       <div class="card">
@@ -130,7 +121,6 @@
         </div>
       </div>
     </div>
-
     <!-- ── Deactivate ────────────────────────────────────────────────────── -->
     <div class="section" id="deactivate">
       <div class="card">
@@ -154,16 +144,45 @@
         </div>
       </div>
     </div>
-
+    <!-- ── Manage Users ──────────────────────────────────────────────────── -->
+    <div class="section" id="users">
+      <div class="card">
+        <div class="card-title">Register New User</div>
+        <p style="font-size:14px;color:var(--gray);margin-bottom:16px">
+          Assigns a role on-chain and registers the wallet in the system.
+        </p>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Wallet Address *</label>
+            <input type="text" id="regWallet" placeholder="0x...">
+          </div>
+          <div class="form-group">
+            <label>Role *</label>
+            <select id="regRole">
+              <option value="">Select role</option>
+              <option value="MANUFACTURER">Manufacturer</option>
+              <option value="DISTRIBUTOR">Distributor</option>
+              <option value="REGULATOR">Regulator</option>
+              <option value="CONSUMER">Consumer</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" id="regName" placeholder="e.g. Lusaka Distributor">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" id="regBtn">Register User</button>
+          <span class="status" id="regStatus"></span>
+        </div>
+      </div>
+    </div>
   </div>
   </main>
 </div>
-
 <script type="module">
 import { connectWallet, getWallet, shortenAddress, audit, products, setStatus } from '../shared/api.js';
-
 let wallet = null;
-
 // ── Wallet ────────────────────────────────────────────────────────────────────
 async function connect() {
   try {
@@ -181,14 +200,11 @@ async function connect() {
     alert(err.message);
   }
 }
-
 document.getElementById('connectBtn').addEventListener('click', connect);
 document.getElementById('disconnectBtn').addEventListener('click', () => { wallet = null; document.getElementById('walletDisplay').textContent = 'Not connected'; document.getElementById('connectBtn').style.display = ''; document.getElementById('disconnectBtn').style.display = 'none'; document.getElementById('connectPrompt').style.display = '';
     document.getElementById('dashboardContent').style.display = 'none'; });
 document.getElementById('connectBtnMain').addEventListener('click', connect);
-
 // ── Navigation ────────────────────────────────────────────────────────────────
-
   // ── Mobile sidebar ──────────────────────────────────────────────────────
   const hamburger = document.getElementById('hamburgerBtn');
   const sidebarEl = document.querySelector('.sidebar');
@@ -203,7 +219,6 @@ document.getElementById('connectBtnMain').addEventListener('click', connect);
   document.querySelectorAll('.sidebar nav a').forEach(link => {
     link.addEventListener('click', () => { if (window.innerWidth <= 700) closeSidebar(); });
   });
-
   document.querySelectorAll('.sidebar nav a').forEach(link => {
   link.addEventListener('click', e => {
     e.preventDefault();
@@ -216,13 +231,11 @@ document.getElementById('connectBtnMain').addEventListener('click', connect);
     if (link.dataset.section === 'flags')      loadFlags();
   });
 });
-
 function showSection(name) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   const el = document.getElementById(name);
   if (el) el.classList.add('active');
 }
-
 // ── Overview ──────────────────────────────────────────────────────────────────
 async function loadOverview() {
   try {
@@ -230,17 +243,14 @@ async function loadOverview() {
       audit.summary(wallet),
       audit.events({ limit: 10 }, wallet),
     ]);
-
     document.getElementById('statProducts').textContent  = summary.totalProducts  ?? '—';
     document.getElementById('statTransfers').textContent = summary.totalTransfers ?? '—';
     document.getElementById('statFlags').textContent     = summary.openFlags      ?? '—';
-
     renderEventsTable('overviewEventsBody', eventsData.events || [], 6);
   } catch (err) {
     console.error('Overview error:', err);
   }
 }
-
 function renderEventsTable(tbodyId, events, cols = 8) {
   const tbody = document.getElementById(tbodyId);
   if (!events.length) {
@@ -274,10 +284,8 @@ function renderEventsTable(tbodyId, events, cols = 8) {
     </tr>`;
   }).join('');
 }
-
 // ── Events ────────────────────────────────────────────────────────────────────
 let currentEvents = [];
-
 async function loadEvents(params = {}) {
   try {
     const { events } = await audit.events(params, wallet);
@@ -287,7 +295,6 @@ async function loadEvents(params = {}) {
     console.error('Events error:', err);
   }
 }
-
 document.getElementById('filterBtn').addEventListener('click', () => {
   const code = document.getElementById('filterCode').value.trim();
   const params = {
@@ -296,7 +303,6 @@ document.getElementById('filterBtn').addEventListener('click', () => {
     limit: 200,
   };
   if (code) {
-    // Convert code to product_id
     import('ethers').then(({ id }) => {
       params.product_id = id(code);
       loadEvents(params);
@@ -305,7 +311,6 @@ document.getElementById('filterBtn').addEventListener('click', () => {
     loadEvents(params);
   }
 });
-
 // CSV export
 document.getElementById('exportBtn').addEventListener('click', () => {
   if (!currentEvents.length) { alert('No events to export.'); return; }
@@ -320,7 +325,6 @@ document.getElementById('exportBtn').addEventListener('click', () => {
   a.click();
   URL.revokeObjectURL(url);
 });
-
 // ── Flags ─────────────────────────────────────────────────────────────────────
 async function loadFlags() {
   const tbody = document.getElementById('flagsBody');
@@ -343,7 +347,6 @@ async function loadFlags() {
     tbody.innerHTML = `<tr><td colspan="7" style="color:red;padding:20px">${err.message}</td></tr>`;
   }
 }
-
 window.resolveFlag = async (id, btn) => {
   btn.disabled = true;
   try {
@@ -354,21 +357,16 @@ window.resolveFlag = async (id, btn) => {
     btn.disabled = false;
   }
 };
-
 // ── Deactivate ────────────────────────────────────────────────────────────────
 document.getElementById('deactBtn').addEventListener('click', async () => {
   if (!wallet) return;
   const code   = document.getElementById('deactCode').value.trim();
   const reason = document.getElementById('deactReason').value.trim();
   const status = document.getElementById('deactStatus');
-
   if (!code || !reason) return setStatus(status, 'Product code and reason are required.', 'error');
-
   if (!confirm(`Are you sure you want to deactivate "${code}" on-chain? This cannot be reversed.`)) return;
-
   setStatus(status, 'Sending transaction...', 'loading');
   document.getElementById('deactBtn').disabled = true;
-
   try {
     const res = await products.deactivate(code, reason, wallet);
     setStatus(status, `Deactivated. Tx: ${res.txHash}`, 'success');
@@ -378,7 +376,37 @@ document.getElementById('deactBtn').addEventListener('click', async () => {
     document.getElementById('deactBtn').disabled = false;
   }
 });
-
+// ── Manage Users ──────────────────────────────────────────────────────────────
+document.getElementById('regBtn').addEventListener('click', async () => {
+  if (!wallet) return;
+  const walletAddr = document.getElementById('regWallet').value.trim();
+  const role       = document.getElementById('regRole').value;
+  const name       = document.getElementById('regName').value.trim();
+  const status     = document.getElementById('regStatus');
+  if (!walletAddr || !role) return setStatus(status, 'Wallet address and role are required.', 'error');
+  setStatus(status, 'Registering...', 'loading');
+  document.getElementById('regBtn').disabled = true;
+  try {
+    const res = await fetch('https://supply-chain-backend-a4y7.onrender.com/api/users/assign-role', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-wallet-address': wallet,
+      },
+      body: JSON.stringify({ wallet: walletAddr, role, name }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Registration failed');
+    setStatus(status, `Registered successfully. Tx: ${data.txHash}`, 'success');
+    document.getElementById('regWallet').value = '';
+    document.getElementById('regRole').value   = '';
+    document.getElementById('regName').value   = '';
+  } catch (err) {
+    setStatus(status, err.message, 'error');
+  } finally {
+    document.getElementById('regBtn').disabled = false;
+  }
+});
 // ── Init ──────────────────────────────────────────────────────────────────────
 (async () => {
   wallet = await getWallet();
