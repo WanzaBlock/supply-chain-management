@@ -449,7 +449,7 @@
       <span>Scan QR Code</span>
     </div>
     <div class="scan-card-body">
-      <div id="reader"></div>
+      <div id="reader" style="width:100%;max-width:320px;margin:0 auto;border-radius:8px;overflow:hidden;"></div>
       <div class="divider">or enter code manually</div>
       <div class="lookup-row">
         <input type="text" id="manualCode" placeholder="e.g. SEED-BATCH-001" autocomplete="off" />
@@ -528,28 +528,38 @@ import { products, formatTimestamp, shortenAddress, setStatus } from '../shared/
 
 let scanner = null;
 
-function initScanner() {
+async function initScanner() {
   if (scanner) return;
-  scanner = new Html5QrcodeScanner('reader', { fps: 10, qrbox: 240 });
-  scanner.render(
-    async (text) => {
-      await scanner.clear();
-      scanner = null;
-      // Extract code from URL if QR contains full URL
-      try {
-        const url = new URL(text.trim());
-        const code = url.searchParams.get('code');
-        await lookupProduct(code || text.trim());
-      } catch {
-        await lookupProduct(text.trim());
-      }
-    },
-    () => {}
-  );
+  scanner = new Html5Qrcode('reader');
+  try {
+    await scanner.start(
+      { facingMode: 'environment' }, // back camera
+      { fps: 10, qrbox: { width: 240, height: 240 } },
+      async (text) => {
+        await scanner.stop();
+        scanner = null;
+        try {
+          const url = new URL(text.trim());
+          const code = url.searchParams.get('code');
+          await lookupProduct(code || text.trim());
+        } catch {
+          await lookupProduct(text.trim());
+        }
+      },
+      () => {}
+    );
+  } catch (err) {
+    // Camera permission denied or not available — show manual only
+    document.getElementById('reader').innerHTML =
+      '<p style="text-align:center;padding:20px;color:#6B7280;font-size:13px">Camera not available. Please enter the code manually below.</p>';
+    scanner = null;
+  }
 }
 
 async function lookupProduct(code) {
   if (!code) return;
+  // Stop scanner if running
+  if (scanner) { try { await scanner.stop(); } catch {} scanner = null; }
   const statusEl = document.getElementById('scanStatus');
   setStatus(statusEl, `Looking up "${code}"...`, 'loading');
   document.getElementById('result').style.display = 'none';
@@ -649,10 +659,10 @@ document.getElementById('lookupBtn').addEventListener('click', () => {
 document.getElementById('manualCode').addEventListener('keypress', e => {
   if (e.key === 'Enter') document.getElementById('lookupBtn').click();
 });
-document.getElementById('scanAgainBtn').addEventListener('click', () => {
+document.getElementById('scanAgainBtn').addEventListener('click', async () => {
   document.getElementById('result').style.display = 'none';
   document.getElementById('manualCode').value = '';
-  initScanner();
+  await initScanner();
 });
 
 // Auto-lookup from URL param
