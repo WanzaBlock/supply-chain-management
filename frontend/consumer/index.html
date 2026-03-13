@@ -3,154 +3,481 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Product Verify — Supply Chain</title>
-  <link rel="stylesheet" href="../shared/style.css">
-  <!-- html5-qrcode library -->
+  <title>Verify Product — WanzaBlock</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
   <style>
-    body { background: var(--light-gray); }
-    .consumer-wrap {
-      max-width: 540px;
-      margin:    0 auto;
-      padding:   24px 16px;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue:        #1A3A5C;
+      --mid-blue:    #2563EB;
+      --terracotta:  #C4632A;
+      --forest:      #1A3D2B;
+      --gold:        #D4A017;
+      --cream:       #FAF7F2;
+      --cream-dark:  #EFE6D5;
+      --white:       #FFFFFF;
+      --gray:        #6B7280;
+      --text:        #1C1C1C;
+      --shadow:      0 2px 12px rgba(0,0,0,0.08);
+      --shadow-md:   0 4px 24px rgba(0,0,0,0.12);
+      --radius:      12px;
     }
-    .consumer-header {
-      text-align:    center;
-      margin-bottom: 24px;
-    }
-    .consumer-header h1 { color: var(--blue); font-size: 22px; }
-    .consumer-header p  { color: var(--gray); font-size: 14px; margin-top: 4px; }
-
-    .scan-box {
-      background:    var(--white);
-      border-radius: var(--radius);
-      box-shadow:    var(--shadow);
-      padding:       20px;
-      margin-bottom: 20px;
-      text-align:    center;
-    }
-    .scan-box h2 { font-size: 16px; color: var(--blue); margin-bottom: 14px; }
-
-    .manual-lookup {
-      display:    flex;
-      gap:        8px;
-      margin-top: 14px;
-    }
-    .manual-lookup input {
-      flex:          1;
-      padding:       8px 12px;
-      border:        1px solid #D1D5DB;
-      border-radius: var(--radius);
-      font-size:     14px;
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      min-height: 100vh;
     }
 
-    #reader { width: 100%; max-width: 300px; margin: 0 auto; }
-
-    .product-card {
-      background:    var(--white);
-      border-radius: var(--radius);
-      box-shadow:    var(--shadow);
-      overflow:      hidden;
-      margin-bottom: 20px;
-    }
-    .product-card-header {
+    /* ── Header ── */
+    .app-header {
       background: var(--blue);
-      color:      var(--white);
-      padding:    16px 20px;
-      display:    flex;
+      height: 60px;
+      display: flex;
       align-items: center;
-      gap:        12px;
+      padding: 0 28px;
+      gap: 14px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
-    .product-card-header .auth-icon {
-      font-size: 28px;
+    .app-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--white);
+      flex: 1;
     }
-    .product-card-header h3 { font-size: 18px; }
-    .product-card-header p  { font-size: 13px; color: var(--accent-blue); margin-top: 2px; }
-
-    .product-meta {
-      padding:               16px 20px;
-      display:               grid;
-      grid-template-columns: 1fr 1fr;
-      gap:                   10px 20px;
-      border-bottom:         1px solid var(--light-blue);
+    .app-header h1 span { color: var(--gold); }
+    .role-badge {
+      background: var(--terracotta);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      text-transform: uppercase;
     }
-    .meta-item label { font-size: 12px; color: var(--gray); display: block; }
-    .meta-item span  { font-size: 14px; color: var(--dark-gray); font-weight: 500; }
+    .back-link {
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--white); }
+    .back-link svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
-    .history-section { padding: 16px 20px; }
-    .history-section h4 { font-size: 14px; font-weight: 600; color: var(--blue); margin-bottom: 14px; }
+    /* ── Hero Banner ── */
+    .hero-banner {
+      background: linear-gradient(135deg, var(--blue) 0%, var(--forest) 100%);
+      padding: 48px 24px;
+      text-align: center;
+    }
+    .hero-banner h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(24px, 5vw, 36px);
+      color: var(--white);
+      margin-bottom: 10px;
+    }
+    .hero-banner p {
+      font-size: 15px;
+      color: rgba(255,255,255,0.65);
+      max-width: 400px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    .hero-icon {
+      width: 56px;
+      height: 56px;
+      background: rgba(196,99,42,0.2);
+      border: 1px solid rgba(196,99,42,0.4);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .hero-icon svg {
+      width: 28px; height: 28px;
+      stroke: var(--terracotta);
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
 
-    .genuine-banner {
-      background:    #D1FAE5;
-      border:        1px solid #6EE7B7;
+    /* ── Main Wrap ── */
+    .wrap {
+      max-width: 580px;
+      margin: 0 auto;
+      padding: 32px 16px 48px;
+    }
+
+    /* ── Scan Card ── */
+    .scan-card {
+      background: var(--white);
       border-radius: var(--radius);
-      padding:       12px 16px;
-      display:       flex;
-      align-items:   center;
-      gap:           10px;
-      margin:        0 20px 16px;
-      color:         #065F46;
-      font-size:     14px;
-      font-weight:   500;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 24px;
+      border: 1px solid rgba(0,0,0,0.05);
     }
-    .counterfeit-banner {
-      background: #FEE2E2;
-      border:     1px solid #FCA5A5;
-      color:      #991B1B;
+    .scan-card-header {
+      background: var(--cream);
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--cream-dark);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .scan-card-header svg {
+      width: 18px; height: 18px;
+      stroke: var(--terracotta);
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .scan-card-header span {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--blue);
+    }
+    .scan-card-body { padding: 20px 22px; }
+    #reader { width: 100%; max-width: 320px; margin: 0 auto; }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 18px 0;
+      color: var(--gray);
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--cream-dark);
+    }
+
+    .lookup-row {
+      display: flex;
+      gap: 10px;
+    }
+    .lookup-row input {
+      flex: 1;
+      padding: 11px 14px;
+      border: 1.5px solid var(--cream-dark);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background: var(--cream);
+      transition: border-color 0.18s, box-shadow 0.18s;
+      outline: none;
+    }
+    .lookup-row input:focus {
+      border-color: var(--terracotta);
+      box-shadow: 0 0 0 3px rgba(196,99,42,0.12);
+      background: var(--white);
+    }
+    .btn-lookup {
+      background: var(--terracotta);
+      color: var(--white);
+      border: none;
+      border-radius: 8px;
+      padding: 11px 22px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(196,99,42,0.3);
+      transition: all 0.18s;
+    }
+    .btn-lookup:hover { background: #a8511e; transform: translateY(-1px); }
+
+    /* ── Status ── */
+    .status {
+      font-size: 13px;
+      font-weight: 500;
+      padding: 9px 14px;
+      border-radius: 8px;
+      margin-top: 12px;
+      display: none;
+    }
+    .status.loading { display: block; background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A; }
+    .status.error   { display: block; background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+    .status.success { display: block; background: #F0FDF4; color: #166534; border: 1px solid #BBF7D0; }
+
+    /* ── Result Card ── */
+    #result { display: none; }
+
+    .auth-banner {
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+      border: 1px solid;
+    }
+    .auth-banner.genuine {
+      background: #F0FDF4;
+      border-color: #86EFAC;
+      color: #166534;
+    }
+    .auth-banner.flagged {
+      background: #FEF2F2;
+      border-color: #FCA5A5;
+      color: #991B1B;
+    }
+    .auth-banner.notfound {
+      background: #FFFBEB;
+      border-color: #FCD34D;
+      color: #92400E;
+    }
+    .auth-banner-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .genuine .auth-banner-icon  { background: #DCFCE7; }
+    .flagged .auth-banner-icon  { background: #FEE2E2; }
+    .notfound .auth-banner-icon { background: #FEF3C7; }
+    .auth-banner-icon svg {
+      width: 20px; height: 20px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .auth-banner-text strong { display: block; font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+    .auth-banner-text span   { font-size: 13px; opacity: 0.8; }
+
+    /* ── Product Info Card ── */
+    .product-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 20px;
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    .product-card-top {
+      background: var(--blue);
+      padding: 20px 22px;
+    }
+    .product-card-top h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      color: var(--white);
+      margin-bottom: 4px;
+    }
+    .product-card-top .code {
+      font-family: monospace;
+      font-size: 13px;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+    .meta-item {
+      padding: 14px 22px;
+      border-bottom: 1px solid var(--cream-dark);
+      border-right: 1px solid var(--cream-dark);
+    }
+    .meta-item:nth-child(even) { border-right: none; }
+    .meta-item:nth-last-child(-n+2) { border-bottom: none; }
+    .meta-item label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--gray);
+      display: block;
+      margin-bottom: 4px;
+    }
+    .meta-item span {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .meta-item span.mono { font-family: monospace; font-size: 12px; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-green { background: #D1FAE5; color: #065F46; }
+    .badge-red   { background: #FEE2E2; color: #991B1B; }
+
+    /* ── Timeline ── */
+    .history-wrap {
+      padding: 20px 22px;
+      border-top: 2px solid var(--cream-dark);
+    }
+    .history-wrap h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--blue);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .history-wrap h4::before {
+      content: '';
+      display: inline-block;
+      width: 3px; height: 16px;
+      background: var(--terracotta);
+      border-radius: 2px;
+    }
+    .timeline { list-style: none; position: relative; }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 14px; top: 0; bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--terracotta), var(--cream-dark));
+    }
+    .timeline li { position: relative; padding: 0 0 20px 40px; }
+    .timeline li:last-child { padding-bottom: 0; }
+    .timeline li::before {
+      content: '';
+      position: absolute;
+      left: 7px; top: 4px;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--terracotta);
+      border: 2px solid var(--white);
+      box-shadow: 0 0 0 2px var(--terracotta);
+    }
+    .tl-time   { font-size: 11px; color: var(--gray); margin-bottom: 3px; }
+    .tl-title  { font-size: 14px; font-weight: 600; color: var(--blue); margin-bottom: 2px; }
+    .tl-detail { font-size: 13px; color: var(--gray); }
+    .tl-hash   { font-size: 11px; color: var(--gray); font-family: monospace; margin-top: 3px; }
+    .tl-hash a { color: var(--mid-blue); text-decoration: none; }
+    .tl-hash a:hover { text-decoration: underline; }
+
+    /* ── Scan Again ── */
+    .btn-scan-again {
+      width: 100%;
+      padding: 12px;
+      background: var(--white);
+      border: 1.5px solid var(--cream-dark);
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--blue);
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.18s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-scan-again:hover { background: var(--cream); border-color: var(--blue); }
+    .btn-scan-again svg {
+      width: 16px; height: 16px;
+      stroke: currentColor; fill: none;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    @media (max-width: 480px) {
+      .meta-grid { grid-template-columns: 1fr; }
+      .meta-item { border-right: none; }
+      .meta-item:nth-last-child(-n+2) { border-bottom: 1px solid var(--cream-dark); }
+      .meta-item:last-child { border-bottom: none; }
+      .hero-banner { padding: 32px 20px; }
     }
   </style>
 </head>
 <body>
 
+<!-- ── Header ─────────────────────────────────────────────────────────────── -->
 <header class="app-header">
-  <h1>Supply Chain Verify</h1>
-  <span class="role-badge">CONSUMER</span>
-  <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
-    <span></span><span></span><span></span>
-  </button>
+  <h1>Wanza<span>Block</span></h1>
+  <span class="role-badge">Verify</span>
+  <a href="../" class="back-link">
+    <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+    Home
+  </a>
 </header>
 
-<div class="consumer-wrap">
-
-  <div class="consumer-header">
-    <h1>Verify Your Product</h1>
-    <p>Scan the QR code on your product or enter the product code manually.</p>
+<!-- ── Hero ───────────────────────────────────────────────────────────────── -->
+<div class="hero-banner">
+  <div class="hero-icon">
+    <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
   </div>
+  <h2>Verify Your Product</h2>
+  <p>Scan the QR code on your product or enter the product code to see its blockchain-verified history.</p>
+</div>
 
-  <!-- ── Scanner ─────────────────────────────────────────────────────────── -->
-  <div class="scan-box">
-    <h2>Scan QR Code</h2>
-    <div id="reader"></div>
+<!-- ── Main ───────────────────────────────────────────────────────────────── -->
+<div class="wrap">
 
-    <div id="scanStatus" class="status"></div>
-
-    <div style="margin: 14px 0; color: var(--gray); font-size: 13px;">— or enter code manually —</div>
-
-    <div class="manual-lookup">
-      <input type="text" id="manualCode" placeholder="e.g. SEED-BATCH-001" />
-      <button class="btn btn-primary" id="lookupBtn">Look Up</button>
+  <!-- Scanner Card -->
+  <div class="scan-card">
+    <div class="scan-card-header">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h.01M14 17h.01M17 14h.01M17 17h.01M20 14h.01M20 17h.01M20 20h.01M17 20h.01M14 20h.01"/></svg>
+      <span>Scan QR Code</span>
+    </div>
+    <div class="scan-card-body">
+      <div id="reader"></div>
+      <div class="divider">or enter code manually</div>
+      <div class="lookup-row">
+        <input type="text" id="manualCode" placeholder="e.g. SEED-BATCH-001" autocomplete="off" />
+        <button class="btn-lookup" id="lookupBtn">Look Up</button>
+      </div>
+      <div id="scanStatus" class="status"></div>
     </div>
   </div>
 
-  <!-- ── Product Result ──────────────────────────────────────────────────── -->
-  <div id="result" style="display:none">
+  <!-- Result -->
+  <div id="result">
 
-    <!-- Authenticity banner -->
-    <div id="authBanner" class="genuine-banner">
-      <span id="authIcon">✅</span>
-      <span id="authText">Product verified — genuine record found on blockchain.</span>
+    <div id="authBanner" class="auth-banner genuine">
+      <div class="auth-banner-icon">
+        <svg id="authIcon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="auth-banner-text">
+        <strong id="authTitle">Product Verified</strong>
+        <span id="authText">Genuine record found on blockchain.</span>
+      </div>
     </div>
 
     <div class="product-card">
-      <div class="product-card-header">
-        <span class="auth-icon" id="productIcon">📦</span>
-        <div>
-          <h3 id="productName">—</h3>
-          <p id="productCode">—</p>
-        </div>
+      <div class="product-card-top">
+        <h3 id="productName">—</h3>
+        <div class="code" id="productCode">—</div>
       </div>
-
-      <div class="product-meta">
+      <div class="meta-grid">
         <div class="meta-item">
           <label>Batch Number</label>
           <span id="metaBatch">—</span>
@@ -164,20 +491,19 @@
           <span id="metaExpiry">—</span>
         </div>
         <div class="meta-item">
-          <label>Manufacturer</label>
-          <span id="metaManufacturer" style="font-family:monospace;font-size:12px">—</span>
+          <label>Status</label>
+          <span id="metaStatus">—</span>
         </div>
         <div class="meta-item">
           <label>Registered</label>
           <span id="metaRegistered">—</span>
         </div>
         <div class="meta-item">
-          <label>Status</label>
-          <span id="metaStatus">—</span>
+          <label>Manufacturer</label>
+          <span id="metaManufacturer" class="mono">—</span>
         </div>
       </div>
-
-      <div class="history-section">
+      <div class="history-wrap">
         <h4>Chain of Custody</h4>
         <ul class="timeline" id="timeline">
           <li>
@@ -188,7 +514,11 @@
       </div>
     </div>
 
-    <button class="btn btn-secondary" id="scanAgainBtn" style="width:100%">Scan Another Product</button>
+    <button class="btn-scan-again" id="scanAgainBtn">
+      <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>
+      Verify Another Product
+    </button>
+
   </div>
 
 </div>
@@ -198,19 +528,26 @@ import { products, formatTimestamp, shortenAddress, setStatus } from '../shared/
 
 let scanner = null;
 
-// ── QR Scanner ────────────────────────────────────────────────────────────────
 function initScanner() {
-  scanner = new Html5QrcodeScanner('reader', { fps: 10, qrbox: 250 });
+  if (scanner) return;
+  scanner = new Html5QrcodeScanner('reader', { fps: 10, qrbox: 240 });
   scanner.render(
     async (text) => {
       await scanner.clear();
-      await lookupProduct(text.trim());
+      scanner = null;
+      // Extract code from URL if QR contains full URL
+      try {
+        const url = new URL(text.trim());
+        const code = url.searchParams.get('code');
+        await lookupProduct(code || text.trim());
+      } catch {
+        await lookupProduct(text.trim());
+      }
     },
-    (err) => { /* ignore scan errors */ }
+    () => {}
   );
 }
 
-// ── Lookup ────────────────────────────────────────────────────────────────────
 async function lookupProduct(code) {
   if (!code) return;
   const statusEl = document.getElementById('scanStatus');
@@ -219,15 +556,12 @@ async function lookupProduct(code) {
 
   try {
     const { product, history } = await products.get(code);
-
     if (!product) {
       setStatus(statusEl, 'Product not found in the database.', 'error');
-      showCounterfeit();
+      showNotFound(code);
       return;
     }
-
     renderProduct(product, history || []);
-    setStatus(statusEl, '', 'info');
     statusEl.style.display = 'none';
     document.getElementById('result').style.display = 'block';
   } catch (err) {
@@ -237,33 +571,32 @@ async function lookupProduct(code) {
 
 function renderProduct(p, history) {
   const isActive = p.is_active !== false;
+  const banner   = document.getElementById('authBanner');
+  const icon     = document.getElementById('authIcon');
 
-  // Auth banner
-  const banner = document.getElementById('authBanner');
-  if (!isActive) {
-    banner.className = 'genuine-banner counterfeit-banner';
-    document.getElementById('authIcon').textContent = '⚠️';
-    document.getElementById('authText').textContent = 'This product has been flagged or recalled. Do not use.';
+  if (isActive) {
+    banner.className = 'auth-banner genuine';
+    icon.innerHTML   = '<polyline points="20 6 9 17 4 12"/>';
+    document.getElementById('authTitle').textContent = 'Product Verified';
+    document.getElementById('authText').textContent  = 'Genuine record found on blockchain.';
   } else {
-    banner.className = 'genuine-banner';
-    document.getElementById('authIcon').textContent = '✅';
-    document.getElementById('authText').textContent = 'Product verified — genuine record found on blockchain.';
+    banner.className = 'auth-banner flagged';
+    icon.innerHTML   = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+    document.getElementById('authTitle').textContent = 'Product Recalled';
+    document.getElementById('authText').textContent  = 'This product has been flagged or recalled. Do not use.';
   }
 
-  document.getElementById('productName').textContent   = p.name         || '—';
-  document.getElementById('productCode').textContent   = p.product_code || '—';
-  document.getElementById('metaBatch').textContent     = p.batch_number || '—';
-  document.getElementById('metaOrigin').textContent    = p.origin       || '—';
-  document.getElementById('metaExpiry').textContent    = p.expiry_date  || '—';
-  document.getElementById('metaManufacturer').textContent = p.manufacturer_wallet
-    ? shortenAddress(p.manufacturer_wallet) : '—';
-  document.getElementById('metaRegistered').textContent = p.created_at
-    ? new Date(p.created_at).toLocaleDateString() : '—';
-  document.getElementById('metaStatus').innerHTML = isActive
+  document.getElementById('productName').textContent      = p.name         || '—';
+  document.getElementById('productCode').textContent      = p.product_code || '—';
+  document.getElementById('metaBatch').textContent        = p.batch_number || '—';
+  document.getElementById('metaOrigin').textContent       = p.origin       || '—';
+  document.getElementById('metaExpiry').textContent       = p.expiry_date  || '—';
+  document.getElementById('metaManufacturer').textContent = p.manufacturer_wallet ? shortenAddress(p.manufacturer_wallet) : '—';
+  document.getElementById('metaRegistered').textContent   = p.created_at ? new Date(p.created_at).toLocaleDateString() : '—';
+  document.getElementById('metaStatus').innerHTML         = isActive
     ? '<span class="badge badge-green">Active</span>'
     : '<span class="badge badge-red">Inactive</span>';
 
-  // Timeline
   const timeline = document.getElementById('timeline');
   if (!history.length) {
     timeline.innerHTML = `<li>
@@ -273,28 +606,42 @@ function renderProduct(p, history) {
     </li>`;
     return;
   }
-
-  timeline.innerHTML = history.map(e => `<li>
-    <div class="tl-time">${e.timestamp ? new Date(e.timestamp * 1000).toLocaleString() : (e.recorded_at ? new Date(e.recorded_at).toLocaleString() : '—')}</div>
-    <div class="tl-title">
-      ${shortenAddress(e.from || e.from_addr || "")} → ${shortenAddress(e.to || e.to_addr || "")}
-    </div>
-    <div class="tl-detail">${e.notes || 'No notes'}</div>
-    <div class="tl-hash">${e.tx_hash ? `Tx: <a href="https://sepolia.basescan.org/tx/${e.tx_hash}" target="_blank" style="color:var(--mid-blue)">${e.tx_hash.slice(0,18)}...</a>` : ''}</div>
-  </li>`).join('');
+  timeline.innerHTML = history.map(e => {
+    const time = e.timestamp
+      ? new Date(e.timestamp * 1000).toLocaleString()
+      : (e.recorded_at ? new Date(e.recorded_at).toLocaleString() : '—');
+    const from = shortenAddress(e.from || e.from_addr || '');
+    const to   = shortenAddress(e.to   || e.to_addr   || '');
+    const tx   = e.tx_hash
+      ? `Tx: <a href="https://sepolia.basescan.org/tx/${e.tx_hash}" target="_blank">${e.tx_hash.slice(0,18)}...</a>`
+      : '';
+    return `<li>
+      <div class="tl-time">${time}</div>
+      <div class="tl-title">${from} &rarr; ${to}</div>
+      <div class="tl-detail">${e.notes || 'No notes'}</div>
+      ${tx ? `<div class="tl-hash">${tx}</div>` : ''}
+    </li>`;
+  }).join('');
 }
 
-function showCounterfeit() {
+function showNotFound(code) {
   const banner = document.getElementById('authBanner');
-  banner.className = 'genuine-banner counterfeit-banner';
-  document.getElementById('authIcon').textContent = '🚫';
-  document.getElementById('authText').textContent = 'Product not found. This may be counterfeit.';
-  document.getElementById('result').style.display = 'block';
-  document.getElementById('productName').textContent = 'Unknown Product';
+  banner.className = 'auth-banner notfound';
+  document.getElementById('authIcon').innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+  document.getElementById('authTitle').textContent = 'Product Not Found';
+  document.getElementById('authText').textContent  = 'This code was not found. The product may be counterfeit.';
+  document.getElementById('productName').textContent = code;
+  document.getElementById('productCode').textContent = '—';
+  document.getElementById('metaBatch').textContent   = '—';
+  document.getElementById('metaOrigin').textContent  = '—';
+  document.getElementById('metaExpiry').textContent  = '—';
+  document.getElementById('metaManufacturer').textContent = '—';
+  document.getElementById('metaRegistered').textContent   = '—';
+  document.getElementById('metaStatus').innerHTML = '<span class="badge badge-red">Unknown</span>';
   document.getElementById('timeline').innerHTML = '';
+  document.getElementById('result').style.display = 'block';
 }
 
-// ── Events ────────────────────────────────────────────────────────────────────
 document.getElementById('lookupBtn').addEventListener('click', () => {
   const code = document.getElementById('manualCode').value.trim();
   if (code) lookupProduct(code);
@@ -305,49 +652,18 @@ document.getElementById('manualCode').addEventListener('keypress', e => {
 document.getElementById('scanAgainBtn').addEventListener('click', () => {
   document.getElementById('result').style.display = 'none';
   document.getElementById('manualCode').value = '';
-  // Auto-lookup from URL param
-const urlParams = new URLSearchParams(window.location.search);
-const codeParam = urlParams.get("code");
-if (codeParam) {
-  document.getElementById("manualCode").value = codeParam;
-  lookupProduct(codeParam);
-} else {
   initScanner();
-}
-
 });
 
 // Auto-lookup from URL param
 const urlParams = new URLSearchParams(window.location.search);
-const codeParam = urlParams.get("code");
+const codeParam = urlParams.get('code');
 if (codeParam) {
-  document.getElementById("manualCode").value = codeParam;
+  document.getElementById('manualCode').value = codeParam;
   lookupProduct(codeParam);
 } else {
   initScanner();
 }
-
-
-  // Auto-update when user switches MetaMask account
-  if (window.ethereum) {
-    window.ethereum.on('accountsChanged', (accounts) => {
-      wallet = accounts[0] || null;
-      if (wallet) {
-        document.getElementById('walletDisplay').textContent = shortenAddress(wallet);
-        document.getElementById('connectBtn').style.display = 'none';
-        document.getElementById('disconnectBtn').style.display = '';
-        document.getElementById('connectPrompt').style.display = 'none';
-        loadDashboard();
-      } else {
-        wallet = null;
-        document.getElementById('walletDisplay').textContent = 'Not connected';
-        document.getElementById('connectBtn').style.display = '';
-        document.getElementById('disconnectBtn').style.display = 'none';
-        document.getElementById('connectPrompt').style.display = '';
-      }
-    });
-  }
-
 </script>
 </body>
 </html>
