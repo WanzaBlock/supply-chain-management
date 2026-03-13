@@ -40,6 +40,7 @@
       <button class="btn btn-primary" id="connectBtnMain">Connect MetaMask</button>
     </div>
 
+    <div id="dashboardContent" style="display:none">
     <!-- ── Record Transfer ──────────────────────────────────────────────── -->
     <div class="section" id="transfer">
       <div class="card">
@@ -109,6 +110,7 @@
       </div>
     </div>
 
+  </div>
   </main>
 </div>
 
@@ -124,12 +126,14 @@ async function connect() {
     document.getElementById('connectBtn').style.display = 'none';
     document.getElementById('disconnectBtn').style.display = '';
     document.getElementById('connectPrompt').style.display = 'none';
+    document.getElementById('dashboardContent').style.display = 'block';
     showSection('transfer');
   } catch (err) { alert(err.message); }
 }
 
 document.getElementById('connectBtn').addEventListener('click', connect);
-document.getElementById('disconnectBtn').addEventListener('click', () => { wallet = null; document.getElementById('walletDisplay').textContent = 'Not connected'; document.getElementById('connectBtn').style.display = ''; document.getElementById('disconnectBtn').style.display = 'none'; document.getElementById('connectPrompt').style.display = ''; });
+document.getElementById('disconnectBtn').addEventListener('click', () => { wallet = null; document.getElementById('walletDisplay').textContent = 'Not connected'; document.getElementById('connectBtn').style.display = ''; document.getElementById('disconnectBtn').style.display = 'none'; document.getElementById('connectPrompt').style.display = '';
+    document.getElementById('dashboardContent').style.display = 'none'; });
 document.getElementById('connectBtnMain').addEventListener('click', connect);
 
 
