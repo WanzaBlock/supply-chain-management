@@ -1,14 +1,10 @@
 import { JsonRpcProvider, Wallet, Contract } from 'ethers';
-import { readFileSync } from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { createRequire } from 'module';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const require = createRequire(import.meta.url || 'file:///');
 
-// Load ABIs from Foundry output
 function loadABI(contractName) {
-  const abiPath = join(__dirname, '..', 'abi', `${contractName}.json`);
-  return JSON.parse(readFileSync(abiPath, 'utf8')).abi;
+  return require(`../abi/${contractName}.json`).abi;
 }
 
 const provider = new JsonRpcProvider(process.env.ANVIL_RPC_URL);
