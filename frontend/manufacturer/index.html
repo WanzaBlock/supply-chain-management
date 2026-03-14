@@ -300,7 +300,7 @@ document.getElementById('registerBtn').addEventListener('click', async () => {
   if (!wallet) { alert('Connect your wallet first.'); return; }
   const status = document.getElementById('registerStatus');
   const body = {
-    productCode:  document.getElementById('productCode').value.trim(),
+    productCode: document.getElementById('productCode').value.trim().toUpperCase(),
     name:         document.getElementById('productName').value.trim(),
     origin:       document.getElementById('productOrigin').value.trim(),
     batchNumber:  document.getElementById('batchNumber').value.trim(),
