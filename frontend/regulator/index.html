@@ -302,9 +302,9 @@ document.getElementById('filterBtn').addEventListener('click', () => {
     to:   document.getElementById('filterTo').value   || undefined,
     limit: 200,
   };
-  if (code) {
-    import('ethers').then(({ id }) => {
-      params.product_id = id(code);
+ if (code) {
+    import('https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js').then((ethers) => {
+      params.product_id = ethers.id(code);
       loadEvents(params);
     });
   } else {
