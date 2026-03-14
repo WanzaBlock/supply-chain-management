@@ -8,7 +8,7 @@ const router = express.Router();
 // Full event list for regulators. Supports date range and product filters.
 router.get('/events', requireRole('REGULATOR'), async (req, res) => {
   try {
-    const { from, to, product_id, limit = 100, offset = 0 } = req.query;
+    const { from, to, product_id, product_code, limit = 100, offset = 0 } = req.query;
 
     let query = supabase
       .from('events')
@@ -19,6 +19,10 @@ router.get('/events', requireRole('REGULATOR'), async (req, res) => {
     if (from)       query = query.gte('recorded_at', from);
     if (to)         query = query.lte('recorded_at', to);
     if (product_id) query = query.eq('product_id', product_id);
+    if (product_code) {
+      const { data: p } = await supabase.from('products').select('product_id').eq('product_code', product_code).single();
+      if (p) query = query.eq('product_id', p.product_id);
+    }
 
     const { data, count, error } = await query;
     if (error) throw new Error(error.message);
