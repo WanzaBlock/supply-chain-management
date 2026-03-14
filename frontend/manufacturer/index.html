@@ -285,7 +285,12 @@ async function loadOverview() {
     }).join('');
 
     document.getElementById('statActive').textContent = activeCount;
-    document.getElementById('statTransfers').textContent = '—'; // Requires separate call
+    const transferRes = await fetch(`https://supply-chain-backend-a4y7.onrender.com/api/audit/events?limit=200`, {
+  headers: { 'x-wallet-address': wallet, 'Content-Type': 'application/json' }
+});
+const transferData = await transferRes.json();
+const myTransfers = (transferData.events || []).filter(e => e.from_addr === wallet.toLowerCase());
+document.getElementById('statTransfers').textContent = myTransfers.length;
   } catch (err) {
     console.error('Overview error:', err);
   }
