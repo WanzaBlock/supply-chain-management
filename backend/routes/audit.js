@@ -53,7 +53,7 @@ router.get('/my-transfers', requireRole('MANUFACTURER'), async (req, res) => {
     const { data, error } = await supabase
       .from('events')
       .select('*')
-      .eq('from_addr', req.user.wallet)
+      .eq('from_addr', req.user.wallet.toLowerCase())
       .order('recorded_at', { ascending: false });
     if (error) throw new Error(error.message);
     res.json({ events: data, count: data.length });
