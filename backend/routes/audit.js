@@ -47,6 +47,21 @@ router.get('/flags', requireRole('REGULATOR'), async (req, res) => {
 
 // ── GET /api/audit/summary ────────────────────────────────────────────────────
 // High-level stats for the regulator dashboard.
+
+router.get('/my-transfers', requireRole('MANUFACTURER'), async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('events')
+      .select('*')
+      .eq('from_addr', req.user.wallet)
+      .order('recorded_at', { ascending: false });
+    if (error) throw new Error(error.message);
+    res.json({ events: data, count: data.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.get('/summary', requireRole('REGULATOR'), async (req, res) => {
   try {
     const [products, events, flags] = await Promise.all([
