@@ -373,9 +373,10 @@ document.getElementById('deactBtn').addEventListener('click', async () => {
   const status = document.getElementById('deactStatus');
   if (!code || !reason) return setStatus(status, 'Product code and reason are required.', 'error');
   if (!confirm(`Are you sure you want to deactivate "${code}" on-chain? This cannot be reversed.`)) return;
-  setStatus(status, 'Sending transaction...', 'loading');
+  setStatus(status, 'Please confirm in MetaMask...', 'loading');
   document.getElementById('deactBtn').disabled = true;
   try {
+    setStatus(status, 'Waiting for blockchain confirmation... (this may take 10-30 seconds)', 'loading');
     const { txHash, blockNumber } = await deactivateProductOnChain(code);
     const res = await withRetry(() => products.deactivate(code, reason, wallet, txHash, blockNumber));
   } catch (err) {
