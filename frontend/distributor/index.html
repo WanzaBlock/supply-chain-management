@@ -116,7 +116,7 @@
 
 <script type="module">
 import { connectWallet, getWallet, shortenAddress, products, setStatus, formatTimestamp } from '../shared/api.js';
-import { recordTransfer } from '../shared/contract.js';
+import { recordTransferOnChain } from '../shared/contract.js';
 
 let wallet = null;
 
@@ -183,7 +183,7 @@ document.getElementById('transferBtn').addEventListener('click', async () => {
     const location  = { raw: document.getElementById('txLocation').value.trim() };
     const condition = { raw: document.getElementById('txCondition').value.trim() };
     const notes     = document.getElementById('txNotes').value.trim();
-    const receipt = await recordTransfer(code, to, location, condition, notes);
+    const receipt = await recordTransferOnChain(code, to, location, condition, notes);
     const res = await products.transfer(code, { toAddress: to, location, condition, notes, txHash: receipt.hash, blockNumber: receipt.blockNumber }, wallet);
     setStatus(status, `Recorded. Tx: ${res.txHash}`, 'success');
   } catch (err) {
