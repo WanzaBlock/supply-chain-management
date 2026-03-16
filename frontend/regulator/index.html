@@ -182,6 +182,7 @@
 </div>
 <script type="module">
 import { connectWallet, getWallet, shortenAddress, audit, products, setStatus } from '../shared/api.js';
+import { deactivateProduct } from '../shared/contract.js';
 let wallet = null;
 // ── Wallet ────────────────────────────────────────────────────────────────────
 async function connect() {
@@ -366,8 +367,8 @@ document.getElementById('deactBtn').addEventListener('click', async () => {
   setStatus(status, 'Sending transaction...', 'loading');
   document.getElementById('deactBtn').disabled = true;
   try {
-    const res = await products.deactivate(code, reason, wallet);
-    setStatus(status, `Deactivated. Tx: ${res.txHash}`, 'success');
+    const receipt = await deactivateProduct(code);
+    const res = await products.deactivate(code, reason, wallet, receipt.hash, receipt.blockNumber);
   } catch (err) {
     setStatus(status, err.message, 'error');
   } finally {

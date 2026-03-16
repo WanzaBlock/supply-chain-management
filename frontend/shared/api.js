@@ -73,9 +73,9 @@ export const products = {
       method: 'POST', body: JSON.stringify(body)
     }, wallet);
   },
-  deactivate(productCode, reason, wallet) {
+  deactivate(productCode, reason, wallet, txHash, blockNumber) {
     return apiFetch(`/products/${encodeURIComponent(productCode)}/deactivate`, {
-      method: 'POST', body: JSON.stringify({ reason })
+      method: 'POST', body: JSON.stringify({ reason, txHash, blockNumber })
     }, wallet);
   },
   list(params = {}) {

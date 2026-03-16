@@ -29,3 +29,13 @@ export async function recordTransfer(productCode, toAddress, location, condition
   const tx = await contract.recordTransfer(productId, toAddress, locationHash, conditionHash, notes || "");
   return await tx.wait();
 }
+
+export async function deactivateProduct(productCode) {
+  const abi      = await getABI();
+  const provider = new BrowserProvider(window.ethereum);
+  const signer   = await provider.getSigner();
+  const contract = new Contract(SUPPLY_CHAIN_ADDRESS, abi, signer);
+  const productId = ethId(productCode);
+  const tx = await contract.deactivateProduct(productId);
+  return await tx.wait();
+}
