@@ -200,6 +200,7 @@
 
 <script type="module">
 import { connectWallet, getWallet, shortenAddress, products, formatTimestamp, setStatus } from '../shared/api.js';
+import { registerProduct, recordTransfer } from '../shared/contract.js';
 
 let wallet = null;
 
@@ -316,7 +317,8 @@ document.getElementById('registerBtn').addEventListener('click', async () => {
   setStatus(status, 'Sending transaction...', 'loading');
   document.getElementById('registerBtn').disabled = true;
 
-  try {
+    const receipt = await registerProduct(body.productCode, body.metadataHash);
+    const res = await products.register({ ...body, txHash: receipt.hash, blockNumber: receipt.blockNumber }, wallet);
     const res = await products.register(body, wallet);
     setStatus(status, `Registered. Tx: ${res.txHash}`, 'success');
   } catch (err) {
@@ -338,12 +340,12 @@ document.getElementById('transferBtn').addEventListener('click', async () => {
   setStatus(status, 'Sending transaction...', 'loading');
   document.getElementById('transferBtn').disabled = true;
 
-  try {
-    const res = await products.transfer(code, {
-      toAddress:  toAddr,
-      location:   { raw: document.getElementById('txLocation').value.trim() },
-      condition:  { raw: document.getElementById('txCondition').value.trim() },
-      notes:      document.getElementById('txNotes').value.trim(),
+    const location  = { raw: document.getElementById('txLocation').value.trim() };
+    const condition = { raw: document.getElementById('txCondition').value.trim() };
+    const notes     = document.getElementById('txNotes').value.trim();
+    const receipt = await recordTransfer(code, toAddr, location, condition, notes);
+    const res = await products.transfer(code, { toAddress: toAddr, location, condition, notes, txHash: receipt.hash, blockNumber: receipt.blockNumber }, wallet);
+    setStatus(status, `Transfer recorded. Tx: ${res.txHash}`, 'success');
     }, wallet);
     setStatus(status, `Transfer recorded. Tx: ${res.txHash}`, 'success');
   } catch (err) {
