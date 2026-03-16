@@ -379,7 +379,15 @@ document.getElementById('deactBtn').addEventListener('click', async () => {
     setStatus(status, 'Waiting for blockchain confirmation... (this may take 10-30 seconds)', 'loading');
     const { txHash, blockNumber } = await deactivateProductOnChain(code);
     setStatus(status, `Confirmed on-chain. Saving to database... Tx: ${txHash}`, 'loading');
-    const res = await withRetry(() => products.deactivate(code, reason, wallet, txHash, blockNumber));
+    // Short timeout for DB save — don't block user if Render is slow
+    try {
+      const res = await Promise.race([
+        products.deactivate(code, reason, wallet, txHash, blockNumber),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('DB save timeout')), 8000))
+      ]);
+    } catch (saveErr) {
+      console.warn('DB save failed but tx confirmed:', txHash, saveErr.message);
+    }
     setStatus(status, `Product deactivated. Tx: ${txHash}`, 'success');
   } catch (err) {
     setStatus(status, err.message, 'error');
