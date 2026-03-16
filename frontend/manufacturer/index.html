@@ -317,9 +317,9 @@ document.getElementById('registerBtn').addEventListener('click', async () => {
   setStatus(status, 'Sending transaction...', 'loading');
   document.getElementById('registerBtn').disabled = true;
 
+  try {
     const receipt = await registerProduct(body.productCode, body.metadataHash);
     const res = await products.register({ ...body, txHash: receipt.hash, blockNumber: receipt.blockNumber }, wallet);
-    const res = await products.register(body, wallet);
     setStatus(status, `Registered. Tx: ${res.txHash}`, 'success');
   } catch (err) {
     setStatus(status, err.message, 'error');
