@@ -134,3 +134,18 @@ export function onAccountChanged(callback) {
     });
   }
 }
+
+// Retry a function up to n times with delay
+async function withRetry(fn, retries = 3, delayMs = 3000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      const isLast = i === retries - 1;
+      const isNetwork = err.message.includes('NetworkError') || err.message.includes('fetch') || err.name === 'AbortError';
+      if (isLast || !isNetwork) throw err;
+      await new Promise(r => setTimeout(r, delayMs));
+    }
+  }
+}
+export { withRetry };

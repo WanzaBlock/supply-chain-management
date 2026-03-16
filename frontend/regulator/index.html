@@ -190,7 +190,7 @@
 
 </script>
 <script type="module">
-import { connectWallet, getWallet, shortenAddress, audit, products, setStatus } from '../shared/api.js';
+import { connectWallet, getWallet, shortenAddress, audit, products, setStatus, withRetry } from '../shared/api.js';
 import { deactivateProductOnChain } from '../shared/contract.js';
 let wallet = null;
 // ── Wallet ────────────────────────────────────────────────────────────────────
@@ -377,7 +377,7 @@ document.getElementById('deactBtn').addEventListener('click', async () => {
   document.getElementById('deactBtn').disabled = true;
   try {
     const { txHash, blockNumber } = await deactivateProductOnChain(code);
-    const res = await products.deactivate(code, reason, wallet, txHash, blockNumber);
+    const res = await withRetry(() => products.deactivate(code, reason, wallet, txHash, blockNumber));
   } catch (err) {
     setStatus(status, err.message, 'error');
   } finally {
