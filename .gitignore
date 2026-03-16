@@ -32,3 +32,6 @@ npm-debug.log*
 contracts/broadcast/
 contracts/.env
 .env
+
+# Local Netlify folder
+.netlify
