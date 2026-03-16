@@ -1,3 +1,4 @@
+// v3 — no tx.wait()
 import { BrowserProvider, Contract, id as ethId, keccak256, toUtf8Bytes } from 'https://cdn.jsdelivr.net/npm/ethers@6.13.0/+esm';
 
 const SUPPLY_CHAIN_ADDRESS = '0x759030681d74Aae64b0632073444B08e1Ddc77F6';
