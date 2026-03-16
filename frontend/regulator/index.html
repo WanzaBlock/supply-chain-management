@@ -378,7 +378,9 @@ document.getElementById('deactBtn').addEventListener('click', async () => {
   try {
     setStatus(status, 'Waiting for blockchain confirmation... (this may take 10-30 seconds)', 'loading');
     const { txHash, blockNumber } = await deactivateProductOnChain(code);
+    setStatus(status, `Confirmed on-chain. Saving to database... Tx: ${txHash}`, 'loading');
     const res = await withRetry(() => products.deactivate(code, reason, wallet, txHash, blockNumber));
+    setStatus(status, `Product deactivated. Tx: ${txHash}`, 'success');
   } catch (err) {
     setStatus(status, err.message, 'error');
   } finally {
