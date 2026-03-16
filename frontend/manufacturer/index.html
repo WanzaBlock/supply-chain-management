@@ -200,7 +200,7 @@
 
 <script type="module">
 import { connectWallet, getWallet, shortenAddress, products, formatTimestamp, setStatus } from '../shared/api.js';
-import { registerProduct, recordTransfer } from '../shared/contract.js';
+import { registerProductOnChain, recordTransferOnChain } from '../shared/contract.js';
 
 let wallet = null;
 
@@ -314,12 +314,12 @@ document.getElementById('registerBtn').addEventListener('click', async () => {
     return setStatus(status, 'Product Code and Metadata Hash are required.', 'error');
   }
 
-  setStatus(status, 'Sending transaction...', 'loading');
+  setStatus(status, 'Please confirm in MetaMask...', 'loading');
   document.getElementById('registerBtn').disabled = true;
 
   try {
-    const receipt = await registerProduct(body.productCode, body.metadataHash);
-    const res = await products.register({ ...body, txHash: receipt.hash, blockNumber: receipt.blockNumber }, wallet);
+    const { txHash, blockNumber } = await registerProductOnChain(body.productCode, body.metadataHash);
+    const res = await products.register({ ...body, txHash, blockNumber }, wallet);
     setStatus(status, `Registered. Tx: ${res.txHash}`, 'success');
   } catch (err) {
     setStatus(status, err.message, 'error');
@@ -337,16 +337,15 @@ document.getElementById('transferBtn').addEventListener('click', async () => {
 
   if (!code || !toAddr) return setStatus(status, 'Product code and recipient address are required.', 'error');
 
-  setStatus(status, 'Sending transaction...', 'loading');
+  setStatus(status, 'Please confirm in MetaMask...', 'loading');
   document.getElementById('transferBtn').disabled = true;
 
+  try {
     const location  = { raw: document.getElementById('txLocation').value.trim() };
     const condition = { raw: document.getElementById('txCondition').value.trim() };
     const notes     = document.getElementById('txNotes').value.trim();
-    const receipt = await recordTransfer(code, toAddr, location, condition, notes);
-    const res = await products.transfer(code, { toAddress: toAddr, location, condition, notes, txHash: receipt.hash, blockNumber: receipt.blockNumber }, wallet);
-    setStatus(status, `Transfer recorded. Tx: ${res.txHash}`, 'success');
-    }, wallet);
+    const { txHash, blockNumber } = await recordTransferOnChain(code, toAddr, location, condition, notes);
+    const res = await products.transfer(code, { toAddress: toAddr, location, condition, notes, txHash, blockNumber }, wallet);
     setStatus(status, `Transfer recorded. Tx: ${res.txHash}`, 'success');
   } catch (err) {
     setStatus(status, err.message, 'error');

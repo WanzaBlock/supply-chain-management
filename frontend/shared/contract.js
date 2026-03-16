@@ -1,41 +1,68 @@
-import { BrowserProvider, Contract, id as ethId, keccak256, toUtf8Bytes } from "https://esm.sh/ethers@6";
+// contract.js — Frontend contract interactions via MetaMask
+// Uses window.ethereum as signer — no private key on frontend
 
-const SUPPLY_CHAIN_ADDRESS = "0x759030681d74Aae64b0632073444B08e1Ddc77F6";
+import { BrowserProvider, Contract, id as ethId, keccak256, toUtf8Bytes } from
+  'https://esm.sh/ethers@6.13.0';
 
-async function getABI() {
-  const res = await fetch("/shared/SupplyChain.json");
+const SUPPLY_CHAIN_ADDRESS = '0x4a698d6a6988Fd84BA101c07Ad36E7Da4a7ab666';
+const CHAIN_ID = '0x14a34'; // Base Sepolia 84532
+
+// ── Load ABI ──────────────────────────────────────────────────────────────────
+async function loadABI() {
+  const res = await fetch('/shared/SupplyChain.json');
   const json = await res.json();
-  return json.abi;
+  return json.abi || json;
 }
 
-export async function registerProduct(productCode, metadataHash) {
-  const abi      = await getABI();
+// ── Get signer from MetaMask ──────────────────────────────────────────────────
+async function getSigner() {
+  if (!window.ethereum) throw new Error('MetaMask not found');
+  // Ensure correct network
+  const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+  if (chainId !== CHAIN_ID) {
+    await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: CHAIN_ID }],
+    });
+  }
   const provider = new BrowserProvider(window.ethereum);
-  const signer   = await provider.getSigner();
-  const contract = new Contract(SUPPLY_CHAIN_ADDRESS, abi, signer);
-  const productId = ethId(productCode);
-  const tx = await contract.registerProduct(productId, metadataHash);
-  return await tx.wait();
+  return provider.getSigner();
 }
 
-export async function recordTransfer(productCode, toAddress, location, condition, notes) {
-  const abi      = await getABI();
-  const provider = new BrowserProvider(window.ethereum);
-  const signer   = await provider.getSigner();
-  const contract = new Contract(SUPPLY_CHAIN_ADDRESS, abi, signer);
+// ── Get contract instance ─────────────────────────────────────────────────────
+async function getContract() {
+  const [abi, signer] = await Promise.all([loadABI(), getSigner()]);
+  return new Contract(SUPPLY_CHAIN_ADDRESS, abi, signer);
+}
+
+// ── registerProduct ───────────────────────────────────────────────────────────
+// MetaMask signs: registerProduct(bytes32 productId, string metadataHash)
+export async function registerProductOnChain(productCode, metadataHash) {
+  const contract   = await getContract();
+  const productId  = ethId(productCode);
+  const tx         = await contract.registerProduct(productId, metadataHash);
+  const receipt    = await tx.wait();
+  return { txHash: receipt.hash, blockNumber: Number(receipt.blockNumber) };
+}
+
+// ── recordTransfer ────────────────────────────────────────────────────────────
+// MetaMask signs: recordTransfer(bytes32, address, string, string, string)
+export async function recordTransferOnChain(productCode, toAddress, location, condition, notes) {
+  const contract      = await getContract();
   const productId     = ethId(productCode);
-  const locationHash  = keccak256(toUtf8Bytes(JSON.stringify(location || {})));
+  const locationHash  = keccak256(toUtf8Bytes(JSON.stringify(location  || {})));
   const conditionHash = keccak256(toUtf8Bytes(JSON.stringify(condition || {})));
-  const tx = await contract.recordTransfer(productId, toAddress, locationHash, conditionHash, notes || "");
-  return await tx.wait();
+  const tx            = await contract.recordTransfer(productId, toAddress, locationHash, conditionHash, notes || '');
+  const receipt       = await tx.wait();
+  return { txHash: receipt.hash, blockNumber: Number(receipt.blockNumber) };
 }
 
-export async function deactivateProduct(productCode) {
-  const abi      = await getABI();
-  const provider = new BrowserProvider(window.ethereum);
-  const signer   = await provider.getSigner();
-  const contract = new Contract(SUPPLY_CHAIN_ADDRESS, abi, signer);
+// ── deactivateProduct ─────────────────────────────────────────────────────────
+// MetaMask signs: deactivateProduct(bytes32 productId)
+export async function deactivateProductOnChain(productCode) {
+  const contract  = await getContract();
   const productId = ethId(productCode);
-  const tx = await contract.deactivateProduct(productId);
-  return await tx.wait();
+  const tx        = await contract.deactivateProduct(productId);
+  const receipt   = await tx.wait();
+  return { txHash: receipt.hash, blockNumber: Number(receipt.blockNumber) };
 }
