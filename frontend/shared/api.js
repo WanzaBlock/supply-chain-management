@@ -50,7 +50,10 @@ export function shortenAddress(addr) {
 async function apiFetch(path, options = {}, wallet = null) {
   const headers = { 'Content-Type': 'application/json', ...options.headers };
   if (wallet) headers['x-wallet-address'] = wallet;
-  const res  = await fetch(`${API}${path}`, { ...options, headers });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000);
+  const res  = await fetch(`${API}${path}`, { ...options, headers, signal: controller.signal });
+  clearTimeout(timeout);
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'API error');
   return data;

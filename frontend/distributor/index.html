@@ -114,6 +114,15 @@
   </main>
 </div>
 
+<script>
+
+  // Wake backend on page load
+  (function() {
+    fetch('https://supply-chain-backend-a4y7.onrender.com/api/products?limit=1')
+      .catch(() => {});
+  })();
+
+</script>
 <script type="module">
 import { connectWallet, getWallet, shortenAddress, products, setStatus, formatTimestamp } from '../shared/api.js';
 import { recordTransferOnChain } from '../shared/contract.js';
