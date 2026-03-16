@@ -27,22 +27,17 @@ async function getContract() {
   return new Contract(SUPPLY_CHAIN_ADDRESS, abi, signer);
 }
 
-// Wait for tx with 90s timeout — tx.wait() can hang if provider loses event
-async function waitForReceipt(tx) {
-  return Promise.race([
-    tx.wait(),
-    new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Timed out waiting for confirmation. Check MetaMask — if confirmed, refresh and the data will be there.')), 90000)
-    )
-  ]);
+// Don't use tx.wait() — it hangs with BrowserProvider
+// MetaMask already confirmed so just return the hash immediately
+async function sendTx(txPromise) {
+  const tx = await txPromise;
+  return { txHash: tx.hash, blockNumber: 0 };
 }
 
 export async function registerProductOnChain(productCode, metadataHash) {
   const contract  = await getContract();
   const productId = ethId(productCode);
-  const tx        = await contract.registerProduct(productId, metadataHash);
-  const receipt   = await waitForReceipt(tx);
-  return { txHash: receipt.hash, blockNumber: Number(receipt.blockNumber) };
+  return sendTx(contract.registerProduct(productId, metadataHash));
 }
 
 export async function recordTransferOnChain(productCode, toAddress, location, condition, notes) {
@@ -50,15 +45,11 @@ export async function recordTransferOnChain(productCode, toAddress, location, co
   const productId     = ethId(productCode);
   const locationHash  = keccak256(toUtf8Bytes(JSON.stringify(location  || {})));
   const conditionHash = keccak256(toUtf8Bytes(JSON.stringify(condition || {})));
-  const tx            = await contract.recordTransfer(productId, toAddress, locationHash, conditionHash, notes || '');
-  const receipt       = await waitForReceipt(tx);
-  return { txHash: receipt.hash, blockNumber: Number(receipt.blockNumber) };
+  return sendTx(contract.recordTransfer(productId, toAddress, locationHash, conditionHash, notes || ''));
 }
 
 export async function deactivateProductOnChain(productCode) {
   const contract  = await getContract();
   const productId = ethId(productCode);
-  const tx        = await contract.deactivateProduct(productId);
-  const receipt   = await waitForReceipt(tx);
-  return { txHash: receipt.hash, blockNumber: Number(receipt.blockNumber) };
+  return sendTx(contract.deactivateProduct(productId));
 }
