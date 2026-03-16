@@ -1,6 +1,6 @@
 import { JsonRpcProvider, Wallet, Contract } from "ethers";
-import supplyChainABI from "../abi/SupplyChain.json" assert { type: "json" };
-import accessControlABI from "../abi/SupplyChainAccess.json" assert { type: "json" };
+import supplyChainABI from "../abi/SupplyChain.json" with { type: "json" };
+import accessControlABI from "../abi/SupplyChainAccess.json" with { type: "json" };
 const provider = new JsonRpcProvider(process.env.ANVIL_RPC_URL);
 const signer   = new Wallet(process.env.PRIVATE_KEY, provider);
 export const supplyChain = new Contract(
