@@ -3,13 +3,24 @@ pragma solidity 0.8.33;
 
 import "./interfaces/ISupplyChain.sol";
 import "./SupplyChainAccess.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /// @title  SupplyChain
 /// @notice Core registry. Records product batches and all custody transfers.
 ///         All event data is stored on-chain. Large payloads (images, sensor blobs)
 ///         are stored off-chain; only their hashes are stored here.
-contract SupplyChain is ISupplyChain {
+contract SupplyChain is ISupplyChain, ReentrancyGuard {
+
     SupplyChainAccess public immutable access;
+
+    // Fix #1 — track current custodian per product
+    mapping(bytes32 => address) private _custodian;
+
+    // Fix #2 — cap transfer history per product
+    uint256 private constant MAX_TRANSFER_HISTORY = 1_000;
+
+    // Fix #3 — cap string input lengths
+    uint256 private constant MAX_STRING_LENGTH = 256;
 
     mapping(bytes32 => Product)         private _products;
     mapping(bytes32 => TransferEvent[]) private _history;
@@ -42,10 +53,9 @@ contract SupplyChain is ISupplyChain {
         external
         onlyRole(access.MANUFACTURER())
     {
-        require(productId != bytes32(0),            "SupplyChain: empty product id");
-        require(bytes(metadataHash).length > 0,     "SupplyChain: empty metadata hash");
-        // slither-disable-next-line timestamp
-        require(!_products[productId].exists, "SupplyChain: already registered");
+        require(productId != bytes32(0),        "SupplyChain: empty product id");
+        require(bytes(metadataHash).length > 0, "SupplyChain: empty metadata hash");
+        require(!_products[productId].exists,   "SupplyChain: already registered");
 
         _products[productId] = Product({
             id:           productId,
@@ -55,6 +65,9 @@ contract SupplyChain is ISupplyChain {
             exists:       true,
             registeredAt: block.timestamp
         });
+
+        // Fix #1 — manufacturer is the first custodian
+        _custodian[productId] = msg.sender;
 
         if (!_productIdSeen[productId]) {
             _productIds.push(productId);
@@ -67,8 +80,8 @@ contract SupplyChain is ISupplyChain {
     /// @notice Record a custody transfer. MANUFACTURER or DISTRIBUTOR can call this.
     /// @param  productId      Product being transferred
     /// @param  to             Address receiving custody
-    /// @param  locationHash   keccak256 of GPS coords or location string (off-chain stored)
-    /// @param  conditionHash  keccak256 of sensor payload (temperature, humidity, etc.)
+    /// @param  locationHash   Location string or GPS coords (keep short — gas cost)
+    /// @param  conditionHash  Sensor payload note e.g. temperature, humidity
     /// @param  notes          Short free-text note (keep short — gas cost)
     function recordTransfer(
         bytes32 productId,
@@ -78,15 +91,49 @@ contract SupplyChain is ISupplyChain {
         string  calldata notes
     )
         external
+        nonReentrant
         productActive(productId)
     {
+        // Fix #1 — only the current custodian can transfer
+        require(
+            _custodian[productId] == msg.sender,
+            "SupplyChain: not current custodian"
+        );
+
+        // Role check — only manufacturer or distributor can send
         require(
             access.hasRole(msg.sender, access.MANUFACTURER()) ||
             access.hasRole(msg.sender, access.DISTRIBUTOR()),
             "SupplyChain: not manufacturer or distributor"
         );
+
+        // Fix #2 — prevent unbounded history growth
+        require(
+            _history[productId].length < MAX_TRANSFER_HISTORY,
+            "SupplyChain: history limit reached"
+        );
+
+        // Fix #3 — reject oversized string inputs
+        require(bytes(locationHash).length  <= MAX_STRING_LENGTH, "SupplyChain: locationHash too long");
+        require(bytes(conditionHash).length <= MAX_STRING_LENGTH, "SupplyChain: conditionHash too long");
+        require(bytes(notes).length         <= MAX_STRING_LENGTH, "SupplyChain: notes too long");
+
         require(to != address(0), "SupplyChain: zero recipient");
 
+        // Fix #5 — recipient must hold a valid role in the system
+        require(
+            access.hasRole(to, access.DISTRIBUTOR())  ||
+            access.hasRole(to, access.MANUFACTURER()) ||
+            access.hasRole(to, access.REGULATOR())    ||
+            access.hasRole(to, access.CONSUMER()),
+            "SupplyChain: recipient has no valid role"
+        );
+
+        // Fix #1 — update custodian to new recipient
+        _custodian[productId] = to;
+
+        // Fix #4 — block.timestamp used intentionally;
+        // minor validator drift (~15s) is acceptable for a supply chain audit trail
         _history[productId].push(TransferEvent({
             from:          msg.sender,
             to:            to,
@@ -106,7 +153,6 @@ contract SupplyChain is ISupplyChain {
             access.hasRole(msg.sender, access.REGULATOR()),
             "SupplyChain: not authorized to deactivate"
         );
-        // slither-disable-next-line timestamp
         require(_products[productId].exists, "SupplyChain: product not found");
         _products[productId].isActive = false;
         emit ProductDeactivated(productId);
@@ -115,7 +161,6 @@ contract SupplyChain is ISupplyChain {
     // ─── View functions ─────────────────────────────────────────────────────
 
     function getProduct(bytes32 productId) external view returns (Product memory) {
-        // slither-disable-next-line timestamp
         require(_products[productId].exists, "SupplyChain: not found");
         return _products[productId];
     }
@@ -134,6 +179,12 @@ contract SupplyChain is ISupplyChain {
 
     function getTotalProducts() external view returns (uint256) {
         return _productIds.length;
+    }
+
+    /// @notice Returns the current custodian of a product
+    function getCustodian(bytes32 productId) external view returns (address) {
+        require(_products[productId].exists, "SupplyChain: not found");
+        return _custodian[productId];
     }
 
     /// @notice Paginated product list for the manufacturer dashboard
