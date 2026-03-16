@@ -367,8 +367,8 @@ document.getElementById('deactBtn').addEventListener('click', async () => {
   setStatus(status, 'Sending transaction...', 'loading');
   document.getElementById('deactBtn').disabled = true;
   try {
-    const receipt = await deactivateProductOnChain(code);
-    const res = await products.deactivate(code, reason, wallet, receipt.hash, receipt.blockNumber);
+    const { txHash, blockNumber } = await deactivateProductOnChain(code);
+    const res = await products.deactivate(code, reason, wallet, txHash, blockNumber);
   } catch (err) {
     setStatus(status, err.message, 'error');
   } finally {

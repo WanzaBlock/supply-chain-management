@@ -176,16 +176,16 @@ document.getElementById('transferBtn').addEventListener('click', async () => {
   const to     = document.getElementById('txTo').value.trim();
   if (!code || !to) return setStatus(status, 'Product code and recipient are required.', 'error');
 
-  setStatus(status, 'Sending transaction...', 'loading');
+  setStatus(status, 'Please confirm in MetaMask...', 'loading');
   document.getElementById('transferBtn').disabled = true;
 
   try {
     const location  = { raw: document.getElementById('txLocation').value.trim() };
     const condition = { raw: document.getElementById('txCondition').value.trim() };
     const notes     = document.getElementById('txNotes').value.trim();
-    const receipt = await recordTransferOnChain(code, to, location, condition, notes);
-    const res = await products.transfer(code, { toAddress: to, location, condition, notes, txHash: receipt.hash, blockNumber: receipt.blockNumber }, wallet);
-    setStatus(status, `Recorded. Tx: ${res.txHash}`, 'success');
+    const { txHash, blockNumber } = await recordTransferOnChain(code, to, location, condition, notes);
+    const res = await products.transfer(code, { toAddress: to, location, condition, notes, txHash, blockNumber }, wallet);
+    setStatus(status, `Transfer recorded. Tx: ${txHash}`, 'success');
   } catch (err) {
     setStatus(status, err.message, 'error');
   } finally {
