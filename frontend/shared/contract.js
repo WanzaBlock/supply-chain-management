@@ -4,7 +4,7 @@
 import { BrowserProvider, Contract, id as ethId, keccak256, toUtf8Bytes } from
   'https://esm.sh/ethers@6.13.0';
 
-const SUPPLY_CHAIN_ADDRESS = '0x4a698d6a6988Fd84BA101c07Ad36E7Da4a7ab666';
+const SUPPLY_CHAIN_ADDRESS = '0x759030681d74Aae64b0632073444B08e1Ddc77F6';
 const CHAIN_ID = '0x14a34'; // Base Sepolia 84532
 
 // ── Load ABI ──────────────────────────────────────────────────────────────────
