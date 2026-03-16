@@ -1,21 +1,8 @@
 /**
  * shared/api.js — Shared API client and wallet helpers
- * Web3Modal + WalletConnect for mobile support
  */
 
-const PRIMARY_API = 'https://supply-chain-backend-a4y7.onrender.com/api';
-const BACKUP_API  = 'https://wanzablocksupply.netlify.app/api';
-
-async function getActiveAPI() {
-  try {
-    const res = await fetch(`${PRIMARY_API.replace('/api', '')}/health`, { signal: AbortSignal.timeout(4000) });
-    if (res.ok) return PRIMARY_API;
-  } catch {}
-  return BACKUP_API;
-}
-
-let API = PRIMARY_API;
-getActiveAPI().then(url => { API = url; });
+const API = 'https://supply-chain-backend-a4y7.onrender.com/api';
 
 // ── Wallet connection ─────────────────────────────────────────────────────────
 
@@ -35,7 +22,6 @@ export async function connectWallet() {
     }
     return accounts[0];
   }
-  // Mobile — redirect to MetaMask deep link
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   if (isMobile) {
     window.location.href = `https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`;
