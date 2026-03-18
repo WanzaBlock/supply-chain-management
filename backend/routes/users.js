@@ -43,12 +43,11 @@ router.post('/assign-role', requireRole('REGULATOR'), async (req, res) => {
       CONSUMER:     await accessControl.CONSUMER(),
     };
     if (!ROLES[role]) return res.status(400).json({ error: 'Unknown role' });
-    const tx      = await accessControl.assignRole(wallet, ROLES[role]);
-    const receipt = await tx.wait();
+    const tx = await accessControl.assignRole(wallet, ROLES[role]);
     await supabase.from('users').upsert({
       wallet: wallet.toLowerCase(), role, name: name || '',
     }, { onConflict: 'wallet' });
-    res.json({ success: true, txHash: receipt.hash });
+    res.json({ success: true, txHash: tx.hash });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
