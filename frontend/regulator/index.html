@@ -400,6 +400,23 @@ document.getElementById('regBtn').addEventListener('click', async () => {
   if (!wallet) return;
   const walletAddr = document.getElementById('regWallet').value.trim();
   const role       = document.getElementById('regRole').value;
+  const name       = document.getElementById('regName')?.value.trim() || '';
+  const status     = document.getElementById('regStatus');
+  if (!walletAddr || !role) return setStatus(status, 'Wallet and role required.', 'error');
+  setStatus(status, 'Assigning role on-chain...', 'loading');
+  try {
+    const res = await fetch('https://supply-chain-backend-a4y7.onrender.com/api/users/assign-role', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-wallet-address': wallet },
+      body: JSON.stringify({ wallet: walletAddr, role, name })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed');
+    setStatus(status, 'User registered successfully. Role assigned on-chain.', 'success');
+  } catch (err) {
+    setStatus(status, err.message, 'error');
+  }
+  return;
   const name       = document.getElementById('regName').value.trim();
   const status     = document.getElementById('regStatus');
   if (!walletAddr || !role) return setStatus(status, 'Wallet address and role are required.', 'error');
