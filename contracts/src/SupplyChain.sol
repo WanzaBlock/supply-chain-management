@@ -13,13 +13,13 @@ contract SupplyChain is ISupplyChain, ReentrancyGuard {
 
     SupplyChainAccess public immutable access;
 
-    // Fix #1 — track current custodian per product
+    // track current custodian per product
     mapping(bytes32 => address) private _custodian;
 
-    // Fix #2 — cap transfer history per product
+    // cap transfer history per product
     uint256 private constant MAX_TRANSFER_HISTORY = 1_000;
 
-    // Fix #3 — cap string input lengths
+    // cap string input lengths
     uint256 private constant MAX_STRING_LENGTH = 256;
 
     mapping(bytes32 => Product)         private _products;
@@ -44,7 +44,7 @@ contract SupplyChain is ISupplyChain, ReentrancyGuard {
         access = SupplyChainAccess(accessContract);
     }
 
-    // ─── Write functions ────────────────────────────────────────────────────
+    //  Write functions 
 
     /// @notice Register a new product batch. Only MANUFACTURER role.
     /// @param  productId    keccak256 of a unique product/batch code
@@ -66,7 +66,7 @@ contract SupplyChain is ISupplyChain, ReentrancyGuard {
             registeredAt: block.timestamp
         });
 
-        // Fix #1 — manufacturer is the first custodian
+        //  manufacturer is the first custodian
         _custodian[productId] = msg.sender;
 
         if (!_productIdSeen[productId]) {
@@ -94,7 +94,7 @@ contract SupplyChain is ISupplyChain, ReentrancyGuard {
         nonReentrant
         productActive(productId)
     {
-        // Fix #1 — only the current custodian can transfer
+        // only the current custodian can transfer
         require(
             _custodian[productId] == msg.sender,
             "SupplyChain: not current custodian"
@@ -107,20 +107,20 @@ contract SupplyChain is ISupplyChain, ReentrancyGuard {
             "SupplyChain: not manufacturer or distributor"
         );
 
-        // Fix #2 — prevent unbounded history growth
+        // prevent unbounded history growth
         require(
             _history[productId].length < MAX_TRANSFER_HISTORY,
             "SupplyChain: history limit reached"
         );
 
-        // Fix #3 — reject oversized string inputs
+        // reject oversized string inputs
         require(bytes(locationHash).length  <= MAX_STRING_LENGTH, "SupplyChain: locationHash too long");
         require(bytes(conditionHash).length <= MAX_STRING_LENGTH, "SupplyChain: conditionHash too long");
         require(bytes(notes).length         <= MAX_STRING_LENGTH, "SupplyChain: notes too long");
 
         require(to != address(0), "SupplyChain: zero recipient");
 
-        // Fix #5 — recipient must hold a valid role in the system
+        // recipient must hold a valid role in the system
         require(
             access.hasRole(to, access.DISTRIBUTOR())  ||
             access.hasRole(to, access.MANUFACTURER()) ||
@@ -129,10 +129,10 @@ contract SupplyChain is ISupplyChain, ReentrancyGuard {
             "SupplyChain: recipient has no valid role"
         );
 
-        // Fix #1 — update custodian to new recipient
+        // update custodian to new recipient
         _custodian[productId] = to;
 
-        // Fix #4 — block.timestamp used intentionally;
+        //  block.timestamp used intentionally;
         // minor validator drift (~15s) is acceptable for a supply chain audit trail
         _history[productId].push(TransferEvent({
             from:          msg.sender,
@@ -158,7 +158,7 @@ contract SupplyChain is ISupplyChain, ReentrancyGuard {
         emit ProductDeactivated(productId);
     }
 
-    // ─── View functions ─────────────────────────────────────────────────────
+    // View functions
 
     function getProduct(bytes32 productId) external view returns (Product memory) {
         require(_products[productId].exists, "SupplyChain: not found");
