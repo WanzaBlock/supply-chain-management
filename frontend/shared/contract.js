@@ -28,11 +28,25 @@ async function getContract() {
   return new Contract(SUPPLY_CHAIN_ADDRESS, abi, signer);
 }
 
-// Don't use tx.wait() — it hangs with BrowserProvider
-// MetaMask already confirmed so just return the hash immediately
 async function sendTx(txPromise) {
   const tx = await txPromise;
-  return { txHash: tx.hash, blockNumber: 0 };
+  // Poll for receipt using public RPC to get block number
+  const rpc = 'https://sepolia.base.org';
+  let blockNumber = 0;
+  for (let i = 0; i < 20; i++) {
+    await new Promise(r => setTimeout(r, 3000));
+    const res = await fetch(rpc, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', method: 'eth_getTransactionReceipt', params: [tx.hash], id: 1 })
+    });
+    const data = await res.json();
+    if (data.result && data.result.blockNumber) {
+      blockNumber = parseInt(data.result.blockNumber, 16);
+      break;
+    }
+  }
+  return { txHash: tx.hash, blockNumber };
 }
 
 export async function registerProductOnChain(productCode, metadataHash) {
